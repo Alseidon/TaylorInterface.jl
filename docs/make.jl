@@ -2,6 +2,7 @@ push!(LOAD_PATH, "../src")
 
 using TaylorInterface
 
+import Pkg; Pkg.add("Documenter")
 using Documenter
 
 makedocs(
