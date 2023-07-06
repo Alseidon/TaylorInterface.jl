@@ -1,0 +1,28 @@
+mu = 3.0033532813678653e-6;
+ms = 2.447824993713855e-6;
+ws = 0.6255137690094534;
+as = 0.723332;
+a0 = 1.4358367902321345;
+
+umu=1-mu;
+
+msas3=ms/(as*as*as);
+r2=x*x+y*y+z*z;
+rpe2=r2-2*mu*x+mu*mu;
+rpe3i=rpe2^(-3./2);
+rpm2=r2+2*(1-mu)*x+(1-mu)*(1-mu);
+rpm3i=rpm2^(-3./2);
+
+xs= as*cos(ws*t+a0);
+ys=-as*sin(ws*t+a0);
+rps2=r2-2*(xs*x+ys*y)+as*as;
+rps3i=rps2^(-3./2);
+
+diff(x, t) = px+y;
+diff(y, t) = py-x;
+diff(z, t) = pz;
+diff(px,t) = py-(x-mu)*(umu*rpe3i)-(x+umu)*(mu*rpm3i)-(x-xs)*(ms*rps3i)-msas3*xs;
+diff(py,t) =-px-(umu*rpe3i+mu*rpm3i)*y-(y-ys)*(ms*rps3i)-msas3*ys;
+diff(pz,t) =-((umu*rpe3i+mu*rpm3i)+(ms*rps3i))*z;
+
+jet x,y,z,px,py,pz symbols 6 deg 1;

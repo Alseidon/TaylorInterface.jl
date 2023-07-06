@@ -1,2 +1,19 @@
 # This file is machine-generated - editing it directly is not advised
 
+julia_version = "1.9.2"
+manifest_format = "2.0"
+project_hash = "5f069936c00f406e58d3f7b257101a5467dafa57"
+
+[[deps.Libdl]]
+uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
+[[deps.Random]]
+deps = ["SHA", "Serialization"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[deps.SHA]]
+uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
+
+[[deps.Serialization]]
+uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"

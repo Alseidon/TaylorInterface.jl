@@ -1,0 +1,17 @@
+mu = 3.0033532813678653e-6;
+ws = 0.9156638588046531;
+
+umu=1-mu;
+
+r2=x*x+y*y+z*z;
+rpe2=r2-2*mu*x+mu*mu;
+rpe3i=rpe2^(-3./2);
+rpm2=r2+2*(1-mu)*x+(1-mu)*(1-mu);
+rpm3i=rpm2^(-3./2);
+
+diff(x, t) = px+y;
+diff(y, t) = py-x;
+diff(z, t) = pz;
+diff(px,t) = py-(x-mu)*(umu*rpe3i)-(x+umu)*(mu*rpm3i);
+diff(py,t) =-px-(umu*rpe3i+mu*rpm3i)*y;
+diff(pz,t) =-(umu*rpe3i+mu*rpm3i)*z;
