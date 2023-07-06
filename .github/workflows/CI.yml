@@ -28,8 +28,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install taylor tool
         run: |
-          wget -qO - https://web.ma.utexas.edu/repos/deb/taylor.gpg.key | sudo apt-key add -
-          sudo echo "deb http://web.ma.utexas.edu/repos/deb focal main " > /etc/apt/sources.list.d/taylor.list
+          curl -sS https://web.ma.utexas.edu/repos/deb/taylor.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/taylor.gpg
+          echo "deb [signed-by=/usr/share/keyrings/taylor.gpg] http://web.ma.utexas.edu/repos/deb focal main" | sudo tee /etc/apt/sources.list.d/taylor.list
           sudo apt-get update
           sudo apt-get install taylor
       - uses: julia-actions/setup-julia@v1
