@@ -2,11 +2,20 @@
 
 [![Build Status](https://github.com/Alseidon/TaylorInterface.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Alseidon/TaylorInterface.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-This package implements a interface in Julia to the taylor tool created by Àngel Jorba and contributors; for more information, [see here](http://www.maia.ub.es/~angel/taylor/).
+## Introduction
+
+This package implements a interface in Julia to the taylor tool created by Àngel Jorba and contributors. taylor translates movement equations given in a text file to highly efficient C code, also allowing the integration of arbitrary degree jet transport. Its features include:
+
+- parallelisable code (using OpenMP)
+- flexibility in number type (double, complex, MPFR, user-defined...)
+
+For more information, [see here](http://www.maia.ub.es/~angel/taylor/).
+
+At the moment, TaylorInterface supports jet transport for one variable or one symbol, and doesn't support parallelisation of the C code or changing the number type from double. As taylor currently only works on Linux systems, so does TaylorInterface.
 
 ## Installation
 
-You can simply install this package from the Julia REPl, using Pkg. Run Julia, enter `]` to enter the package manager, and then:
+You can simply install this package from the Julia REPL, using Pkg. Run Julia, enter `]` to enter the package manager, and then:
 
 ```julia
 julia> ]
