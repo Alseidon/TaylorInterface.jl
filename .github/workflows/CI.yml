@@ -26,6 +26,12 @@ jobs:
           - x64
     steps:
       - uses: actions/checkout@v3
+      - name: Install taylor tool
+        run: |
+          wget -qO - https://web.ma.utexas.edu/repos/deb/taylor.gpg.key | apt-key add -
+          echo "deb http://web.ma.utexas.edu/repos/deb focal main " > /etc/apt/sources.list.d/taylor.list
+          sudo apt-get update
+          sudo apt-get install taylor
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
