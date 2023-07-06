@@ -28,7 +28,7 @@ import Pkg
 Pkg.add("https://github.com/Alseidon/TaylorInterface.jl")
 ```
 
-You also need the taylor tool installed to use this package. You can find it [here](https://github.com/joang/taylor2-dist) or install it by running:
+You also need the taylor tool installed to use this package. You can find it [here (latest version)](https://github.com/joang/taylor2-dist) or install it by running:
 
 ```bash
 curl -sS https://web.ma.utexas.edu/repos/deb/taylor.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/taylor.gpg
