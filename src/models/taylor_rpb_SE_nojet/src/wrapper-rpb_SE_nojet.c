@@ -3,7 +3,7 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-void poinc_map(double endtime, double x[6], double y[6])
+void poinc_map(double endtime, double x[6], double y[6], double* __unused)
 {
   double t,tf;
   int i;
