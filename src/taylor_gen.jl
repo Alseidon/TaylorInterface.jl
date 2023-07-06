@@ -32,7 +32,7 @@ end
 Returns the directory containing this package.
 """
 function get_dir_src()
-    return dirname(pathof(SysDynUtils))
+    return dirname(pathof(TaylorInterface))
 end
 
 """
