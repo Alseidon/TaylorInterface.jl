@@ -10,6 +10,9 @@ makedocs(
     modules = [TaylorInterface],
     pages = [
         "Home" => "index.md",
+        "Quick start" => "quickstart.md",
+        "Internals" => "internals.md",
+        "Full documentation" => "fulldocs.md"
     ]
 )
 deploydocs(;
