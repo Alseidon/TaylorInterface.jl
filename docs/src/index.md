@@ -29,7 +29,7 @@ julia> ]
 Otherwise, you can run
 ```julia
 import Pkg
-Pkg.add("https://github.com/Alseidon/TaylorInterface.jl")
+Pkg.add(url="https://github.com/Alseidon/TaylorInterface.jl")
 ```
 
 You also need the taylor tool installed to use this package. You can find it [here (latest version)](https://github.com/joang/taylor2-dist) or install it by running:
