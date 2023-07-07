@@ -6,7 +6,7 @@ Documentation under construction.
 
 - [Alexandre Prieur](https://www.alexandre.prieur.eu), PhD student at the [Observatoire de Paris](https://www.obspm.fr)
 
-## Introduction
+## Presentation
 
 This package implements a interface in Julia to the taylor tool created by [Àngel Jorba](http://www.maia.ub.es/~angel/) and contributors. taylor translates movement equations given in a text file to highly efficient C code, also allowing the integration of arbitrary degree jet transport. Its features include:
 
@@ -41,4 +41,4 @@ sudo apt update
 sudo apt install taylor
 ```
 
-Now, you might either want to take a look at the [quick start](@ref quickstart), dive into the [internal machinery](@ref internals) of `TaylorInterface.jl`, or simply search the [full docs](@ref fulldocs).
+Now, you might either want to take a look at the [quick start](@ref quickstart) or begin with the full [introduction](@ref introduction), dive into the [internal machinery](@ref internals) of `TaylorInterface.jl`, or simply search the [full docs](@ref fulldocs).

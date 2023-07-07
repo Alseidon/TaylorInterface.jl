@@ -20,7 +20,7 @@ taylor_ΝAME/
 
 The equation file is a copy of the one given to the `TaylorGenerator`. The `Makefile` contains all the recipes necessary to call taylor and compile the resulting files. taylor generates the `taylor-NAME.c/h` files, which are included by the `wrapper-NAME.c/h` files. Then, gcc compiles all theses files into `.o` files, then into `lib.so`. This final file is the shared library that is opened in Julia.
 
-## C functions
+## [C functions](@id cfunctions)
 
 ### The full taylor_step function
 
