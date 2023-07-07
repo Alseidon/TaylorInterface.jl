@@ -8,6 +8,7 @@ void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
   static MY_JET xjet[_NUMBER_OF_STATE_VARS_];
   double t,tf;
   int i,j;
+  int direction = (endtime > 0);
   static int flag=0;
   
   if (flag == 0)
@@ -20,7 +21,8 @@ void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
   tf=endtime;
   taylor_make_identity_jets(xjet,x,NULL,NULL);
   for (i=0; i<_NUMBER_OF_STATE_VARS_; i++) y[i]=x[i]; 
-  while (taylor_step_auto(&t,y,1,2,-16,-16,&tf,NULL,NULL,xjet) != 1);
+  if (tf == 0.) return;
+  while (taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,xjet) != 1);
   for (i=0; i<_NUMBER_OF_STATE_VARS_; i++)
     for (j=0; j<_MAX_SIZE_OF_JET_VAR_; j++)
       df[i*_NUMBER_OF_STATE_VARS_+j]=xjet[i][j+1];
