@@ -3,7 +3,7 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-void poinc_map(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
+void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
 {
   static MY_JET xjet[_NUMBER_OF_STATE_VARS_];
   double t,tf;

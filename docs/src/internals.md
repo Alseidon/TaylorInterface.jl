@@ -112,7 +112,7 @@ They simply hide some of `taylor_step_auto`'s parameters, and regroup `log10abse
 Finally, we include a Poincaré map from 0. to `endtime`:
 
 ```C
-void poinc_map(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df);
+void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df);
 ```
 
 Where `x` is the initial state, `y` stores the final state and `df` stores the non-zero degree jet transport values.

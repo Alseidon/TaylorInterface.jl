@@ -260,12 +260,12 @@ end
 Opens the handler's library, storing the loaded library and a dictionary with
 symbols to functions in the handler.
 
-Currently, the loaded functions are `poinc_map`, `tstep` and `tstep_reverse`.
+Currently, the loaded functions are `flow`, `tstep` and `tstep_reverse`.
 """
 function open_lib(handler::TaylorHandler)
     lib = Libdl.dlopen(joinpath(handler.path, "lib.so"))
     dict = Dict{String, Ptr{Nothing}}()
-    for func in ["poinc_map", "tstep", "tstep_reverse"]
+    for func in ["flow", "tstep", "tstep_reverse"]
         dict[func] = Libdl.dlsym(lib, Symbol(func))
     end
     handler.symbols = dict

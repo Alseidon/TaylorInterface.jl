@@ -94,7 +94,7 @@ out = zero(in)
 jacobian = zeros(4)
 
 ccall(
-    handler.symbols["poinc_map"],
+    handler.symbols["flow"],
     Cvoid,
     (Cdouble, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}),
     1., out, in, jacobian

@@ -2,14 +2,15 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-void poinc_map(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *__unused)
+void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *__unused)
 {
   double t,tf;
   int i;
+  int direction = (endtime > 0);
   t=0;
   tf=endtime;
   for (i=0; i<_NUMBER_OF_STATE_VARS_; i++) y[i]=x[i]; 
-  while (taylor_step_auto(&t,y,1,2,-16,-16,&tf,NULL,NULL,NULL) != 1);
+  while (taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,NULL) != 1);
   return;
 }
 
