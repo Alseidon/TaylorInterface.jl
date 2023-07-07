@@ -7,7 +7,7 @@ using Test
         s->s[8:end],
         filter(s->s[1:min(length(s), 7)] == "taylor_", readdir(TaylorInterface.get_models_dir()))
     )
-    handlers = map(get_model, default_models)
+    handlers = map(name->get_model(name, false), default_models)
     map(compile_eqs, handlers)
     map(open_lib, handlers)
     map(close_lib, handlers)
