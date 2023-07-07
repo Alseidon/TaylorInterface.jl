@@ -8,7 +8,7 @@ Documentation under construction.
 
 ## Introduction
 
-This package implements a interface in Julia to the taylor tool created by Àngel Jorba and contributors. taylor translates movement equations given in a text file to highly efficient C code, also allowing the integration of arbitrary degree jet transport. Its features include:
+This package implements a interface in Julia to the taylor tool created by [Àngel Jorba](http://www.maia.ub.es/~angel/) and contributors. taylor translates movement equations given in a text file to highly efficient C code, also allowing the integration of arbitrary degree jet transport. Its features include:
 
 - parallelisable code (using OpenMP)
 - flexibility in number type (double, complex, MPFR, user-defined...)
