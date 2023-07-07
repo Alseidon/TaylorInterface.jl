@@ -39,7 +39,7 @@ close_lib
 ```
 
 ```@docs
-clear_lib
+TaylorInterface.clear_lib
 ```
 
 ```@docs
@@ -62,19 +62,19 @@ get_model
 These functions are mainly intended for internal use and navigation within the file system.
 
 ```@docs
-get_dir_src
+TaylorInterface.get_dir_src
 ```
 
 ```@docs
-get_models_dir
+TaylorInterface.get_models_dir
 ```
 
 ```@docs
-get_wrappers
+TaylorInterface.get_wrappers
 ```
 
 ### Taylor flags
 
 ```@docs
-get_jet_flag
+TaylorInterface.get_jet_flag
 ```
