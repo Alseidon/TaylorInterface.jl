@@ -115,4 +115,4 @@ Finally, we include a Poincaré map from 0. to `endtime`:
 void poinc_map(double endtime, double* x, double* y, double* df);
 ```
 
-Where `x` is the initial state, `y` stores the final state and `df` stores the jacobian.
+Where `x` is the initial state, `y` stores the final state and `df` stores the non-zero degree jet transport values.
