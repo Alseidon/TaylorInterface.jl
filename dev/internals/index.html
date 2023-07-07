@@ -9,4 +9,75 @@
     ├── taylor-ΝAME.o
     ├── wrapper-ΝAME.c
     ├── wrapper-ΝAME.h
-    └── wrapper-ΝAME.o</code></pre><p>The equation file is a copy of the one given to the <code>TaylorGenerator</code>. The <code>Makefile</code> contains all the recipes necessary to call taylor and compile the resulting files. taylor generates the <code>taylor-NAME.c/h</code> files, which are included by the <code>wrapper-NAME.c/h</code> files. Then, gcc compiles all theses files into <code>.o</code> files, then into <code>lib.so</code>. This final file is the shared library that is opened in Julia.</p><h2 id="C-functions"><a class="docs-heading-anchor" href="#C-functions">C functions</a><a id="C-functions-1"></a><a class="docs-heading-anchor-permalink" href="#C-functions" title="Permalink"></a></h2><p>The main function defined in the taylor-generated files is <code>taylor_step_auto</code> : this function computes a step of the numerical integration (cf. the <a href="https://github.com/joang/taylor2-dist/blob/main/src/manual/manual.pd">taylor manual</a> for more information). You can use it directly (it is included in the <code>lib.so</code>), but it requires some initialisation beforehand if jet transport is at play, or if the number type isn&#39;t double.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../speed/">« Compared benchmark</a><a class="docs-footer-nextpage" href="../fulldocs/">Full documentation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Friday 7 July 2023 09:19">Friday 7 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    └── wrapper-ΝAME.o</code></pre><p>The equation file is a copy of the one given to the <code>TaylorGenerator</code>. The <code>Makefile</code> contains all the recipes necessary to call taylor and compile the resulting files. taylor generates the <code>taylor-NAME.c/h</code> files, which are included by the <code>wrapper-NAME.c/h</code> files. Then, gcc compiles all theses files into <code>.o</code> files, then into <code>lib.so</code>. This final file is the shared library that is opened in Julia.</p><h2 id="C-functions"><a class="docs-heading-anchor" href="#C-functions">C functions</a><a id="C-functions-1"></a><a class="docs-heading-anchor-permalink" href="#C-functions" title="Permalink"></a></h2><h3 id="The-full-taylor_step-function"><a class="docs-heading-anchor" href="#The-full-taylor_step-function">The full taylor_step function</a><a id="The-full-taylor_step-function-1"></a><a class="docs-heading-anchor-permalink" href="#The-full-taylor_step-function" title="Permalink"></a></h3><p>The main function defined in the taylor-generated files is <code>taylor_step_auto</code> : this function computes a step of the numerical integration (cf. the <a href="https://github.com/joang/taylor2-dist/blob/main/src/manual/manual.pd">taylor manual</a> for more information). Its call signature is</p><pre><code class="language-C hljs">int taylor_step_auto(MY_FLOAT *ti,
+                 MY_FLOAT *x,
+                 int      dir,
+                 int      step_ctl,
+                 double   log10abserr,
+                 double   log10relerr,
+                 MY_FLOAT *endtime,
+                 MY_FLOAT *ht,
+                 int      *order,
+                 MY_JET   *jetInOut)</code></pre><p><code>MY_FLOAT</code> is the number type defined for taylor (double by default). Here is its documentation:</p><pre><code class="nohighlight hljs">single integration step with taylor method. the parameters are:
+ti: on input:  time of the initial condition
+    on output: new time
+x:  on input:  initial condition
+    on output: new condition, corresponding to the (output) time ti
+dir: flag to integrate forward or backwards.
+    1: forward
+   -1: backwards
+    WARNING: this flag is ignored if step_ctl (see below) is set to 0.
+step_ctl: flag for the step size control. the possible values are:
+    0: no step size control, so the step and order are provided by
+       the user. the parameter ht is used as step, and the parameter
+       order (see below) is used as the order.
+    1: standard stepsize control. it uses an approximation to the
+       optimal order and to the radius of convergence of the series
+       to approximate the &#39;optimal&#39; step size. It tries to keep
+       either the absolute or the relative errors below the given
+       values. See the paper for more details.
+    2: as 1, but adding an extra condition on the stepsize h: the
+       terms of the series --after being multiplied by the suitable
+       power of h-- cannot grow.
+   -1: user defined stepsize control. the code has to be included
+       in the routine compute_timestep_user_defined (you can find
+       this routine below). The user should also provide code for
+       the selection of degree (see the function
+       compute_order_user_defined below).
+log10abserr: decimal log of the absolute accuracy. the routine
+    tries to keep either the absolute or the relative errors below
+    the given thresholds.
+log10relerr: decimal log of the relative accuracy. the routine
+    tries to keep either the absolute or the relative errors below
+    the given thresholds.
+endtime: if NULL, it is ignored. if step_ctl (see above) is set
+    to 0, it is also ignored. otherwise, if the step size is too
+    large, it is reduced so that the new time ti is exactly endtime
+    (in that case, the function returns 1).
+ht: on input:  ignored/used as a time step (see parameter step_ctl)
+    on output: time step used if the pointer is not NULL
+order: degree of the taylor expansion.
+       input: this parameter is only used if step_ctl is 0,
+              or if you add the code for the case step_ctl=3.
+              its possible values are:
+              &lt; 2: the program will select degree 2 (if step_ctl is 0).
+              &gt;=2: the program will use this degree (if step_ctl is 0).
+       ouput: degree used if the pointer is not NULL
+jetInOut: on input: the value of all declared jet variables
+          on output: new value of the jet variable, corresponding to the new time
+return value:
+ 0: ok.
+ 1: ok, and ti=endtime.  
+-1: not ok, unable to compute step size.  double_log  underflow/overflow
+ ```
+
+You can use it directly (it is included in the `lib.so`), but it requires some initialisation beforehand if jet transport is at play, or if the number type isn&#39;t double. taylor defines the `InitMyFloat(x)` function to initialize any `MY_FLOAT` variable. For jet transport, you need to call `taylor_initialize_jet_library()` before using it, and `InitJet(x)` on your jet variables. You can refer to `wrapper.h` for an example of the latter case.
+
+### The wrapping functions
+
+`TaylorInterface.jl` adds some convenience functions in the wrapper. First are two simplified versions of `taylor_step_auto`: `tstep and `tstep_reverse`
+</code></pre><p>C int tstep(MY<em>FLOAT *ti, MY</em>FLOAT *x, double log10err, MY_FLOAT *endtime);</p><p>int tstep<em>reverse(MY</em>FLOAT *ti, MY<em>FLOAT *x, double log10err, MY</em>FLOAT *endtime);</p><pre><code class="nohighlight hljs">
+They simply hide some of `taylor_step_auto`&#39;s parameters, and regroup `log10abserr` and `log10relerr`.
+
+Finally, we include a Poincaré map from 0. to `endtime`:
+</code></pre><p>C void poinc_map(double endtime, double* x, double* y, double* df); ```</p><p>Where <code>x</code> is the initial state, <code>y</code> stores the final state and <code>df</code> stores the non-zero degree jet transport values.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../speed/">« Compared benchmark</a><a class="docs-footer-nextpage" href="../fulldocs/">Full documentation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Friday 7 July 2023 10:11">Friday 7 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
