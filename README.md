@@ -126,3 +126,5 @@ At the moment, we propose:
 - `rpb_sun_earth`, the restricted three-body problem for the Sun+Earth system, in synodic (co-rotating) coordinates, assuming circular motion
 - `bcp_sun_earth_jupiter` and `bcp_sun_earth_venus`, where we add a perturbation from a planet in circular motion either Jupiter or Venus (the model is called bicircular)
 - `rpb_SE_nojet`, the same problem as the first, but whereas for the three other cases we computed first-order variational equations, here we remove jet transport for speed.
+
+Note that you will need to compile the model with `compile_eqs(handler)` in order to use it.
