@@ -5,8 +5,7 @@
 
 #include "stdio.h"
 
-
-void poinc_map(double endtime, double x[6], double y[6], double* __unused);
+void poinc_map(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *__unused);
 
 int tstep(MY_FLOAT *ti, MY_FLOAT *x, double log10err, MY_FLOAT *endtime);
 
