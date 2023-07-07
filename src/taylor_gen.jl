@@ -68,14 +68,14 @@ function get_handler(gen::TaylorGenerator, open::Bool=true)
 end
 
 """
-    get_model(name, open=true)
+    get_model(name, open=false)
 
 Get the `TaylorHandler` corresponding to a default model in this package. If
 `open` is true, the library will also be open in the handler.
 
 Warning: `name` should NOT contain the prefix "taylor_h".
 """
-function get_model(name::String, open::Bool=true)
+function get_model(name::String, open::Bool=false)
     fullname = "taylor_$(name)"
     dirname = joinpath(get_models_dir(), fullname)
     if isdir(dirname)
