@@ -39,7 +39,7 @@ close_lib
 ```
 
 ```@docs
-TaylorInterface.clear_lib
+TaylorInterface.clear_dir
 ```
 
 ```@docs
