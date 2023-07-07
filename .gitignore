@@ -1,2 +1,3 @@
-# C obj files
+# Results of C compilation
 *.o
+lib.so
