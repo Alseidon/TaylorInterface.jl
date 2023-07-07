@@ -11,6 +11,7 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Quick start" => "quickstart.md",
+        "Compared benchmark" => "comp.md"
         "Internals" => "internals.md",
         "Full documentation" => "fulldocs.md"
     ]
