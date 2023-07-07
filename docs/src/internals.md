@@ -97,9 +97,9 @@ return value:
 
 You can use it directly (it is included in the `lib.so`), but it requires some initialisation beforehand if jet transport is at play, or if the number type isn't double. taylor defines the `InitMyFloat(x)` function to initialize any `MY_FLOAT` variable. For jet transport, you need to call `taylor_initialize_jet_library()` before using it, and `InitJet(x)` on your jet variables. You can refer to `wrapper.h` for an example of the latter case.
 
-### The wrapping functions
+### [The wrapping functions](@id wrapping_funcs)
 
-`TaylorInterface.jl` adds some convenience functions in the wrapper. First are two simplified versions of `taylor_step_auto`: `tstep and `tstep_reverse`
+`TaylorInterface.jl` adds some convenience functions in the wrapper. First are two simplified versions of `taylor_step_auto`: `tstep` and `tstep_reverse` (respectively when `*endtime` is positive or negative)
 
 ```C
 int tstep(MY_FLOAT *ti, MY_FLOAT *x, double log10err, MY_FLOAT *endtime);

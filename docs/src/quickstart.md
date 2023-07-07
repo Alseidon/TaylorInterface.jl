@@ -47,7 +47,7 @@ To open the library, we use
 open_lib(handler)
 ```
 
-Now, the loaded library is in `handler.lib`, and a dictionary to some of its functions is stored in `handler.symbols`. For instance, let's call the Poincaré map for our above example, and for a duration of 1.
+Now, the loaded library is in `handler.lib`, and a dictionary to some of its functions is stored in `handler.symbols`. For instance, let's call the Poincaré map for our above example, and for a duration of 1 (to see all the wrapping functions, see [here](@ref wrapping_funcs)).
 
 ```julia
 in = [0., 1.]
