@@ -71,7 +71,7 @@ This will create a directory, copy the equation file in it, call taylor on this 
 Now, to open the generated library, we get a `TaylorHandler`:
 
 ```julia
-handler = get_handler(generator, open=false)
+handler = get_handler(generator, false)
 ```
 
 If you have the `TaylorGenerator` corresponding to the directory you want to open, you can use `get_handler` as we just did. Otherwise, you need the path to the directory stored in a string; if this string is stored in `path`, then you can use
@@ -111,7 +111,7 @@ close_lib(handler)
 
 If we don't need the directory anymore, we can delete it:
 ```julia
-clear_dir(handler) # clear_dir(generator) also works
+TaylorInterface.clear_dir(handler) # TaylorInterface.clear_dir(generator) also works
 ```
 
 ## Remarks
