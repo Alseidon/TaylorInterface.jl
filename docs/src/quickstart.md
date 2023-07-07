@@ -21,7 +21,7 @@ Let's save this in a file, namely `eqs.txt`. Now, we create a `TaylorGenerator` 
 ```julia
 using TaylorInterface
 
-generator = TaylorGenerator(eqs_filename="eqs.txt")
+generator = TaylorGenerator("eqs.txt")
 generate_dir(generator)
 ```
 
