@@ -21,7 +21,34 @@ void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
   taylor_make_identity_jets(xjet,x,NULL,NULL);
   for (i=0; i<_NUMBER_OF_STATE_VARS_; i++) y[i]=x[i]; 
   if (tf == 0.) return;
-  while (taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,xjet) != 1);
+  int flag_ret = 0;
+  for (int i = 0; i < 1; i++)
+  {
+    puts("Iterating");
+    flag_ret = taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,NULL);
+    switch (flag_ret)
+    {
+    case -1:
+        puts("Encountered error; exiting");
+        exit(1);
+        break;
+    
+    case 0:
+        continue;
+        break;
+
+    case 1:
+        return;
+        break;
+    
+    default:
+        puts("Unrecognized return value");
+        printf("Unrecognized return value: %i", flag_ret);
+        exit(1);
+        break;
+    }
+    puts("end");
+  }
   for (i=0; i<_NUMBER_OF_STATE_VARS_; i++)
     for (j=0; j<_MAX_SIZE_OF_JET_VAR_; j++)
       df[i*_NUMBER_OF_STATE_VARS_+j]=xjet[i][j+1];
