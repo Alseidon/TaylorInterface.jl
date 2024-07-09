@@ -15,6 +15,8 @@ For more information, [see here](http://www.maia.ub.es/~angel/taylor/).
 
 At the moment, TaylorInterface supports jet transport for one variable or one symbol, and doesn't support parallelisation of the C code or changing the number type from double. As taylor currently only works on Linux systems, so does TaylorInterface.
 
+This package is still in development; feel free to contact me for any questions, suggestions or remarks!
+
 ## Installation
 
 You can simply install this package from the Julia REPL, using Pkg. Run Julia, enter `]` to enter the package manager, and then:
