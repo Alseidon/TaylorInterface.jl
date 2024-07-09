@@ -1,9 +1,9 @@
-#ifndef WRAPPER_bcp_sun_earth_jupiter_H
-#define WRAPPER_bcp_sun_earth_jupiter_H
-        
-#include "taylor-bcp_sun_earth_jupiter.h"
+        #ifndef WRAPPER_bcp_sun_earth_jupiter_H
+        #define WRAPPER_bcp_sun_earth_jupiter_H
 
-#include "stdio.h"
+        #include "taylor-bcp_sun_earth_jupiter.h"
+
+        #include "stdio.h"
 
 void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df);
 

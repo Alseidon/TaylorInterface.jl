@@ -1,4 +1,4 @@
-/* taylor Version 2.1, May 26, 2023 */
+/* taylor Version 2.2, Feb 9, 2024 */
 /* Using coef lib: MY_FLOAT */
 /* Using jet lib: jet_1. n symbol, degree 1 */
 /************************************************************************
@@ -28,6 +28,11 @@ extern "C"
 #define _MAX_SIZE_OF_JET_VAR_          7
 #endif
 
+#ifndef _NUMBER_OF_CLOUD_VARS_
+#define _NUMBER_OF_CLOUD_VARS_         0
+#define _MAX_CLOUD_SIZE_               0
+#endif
+
 #ifndef _TAYLOR_H_
 #define _TAYLOR_H_
 typedef double MY_FLOAT;
@@ -42,6 +47,7 @@ typedef double MY_FLOAT;
  *  It may be 'float', 'double' or user defined private data types
  *  like 'long double', 'complex' etc. 
  */
+#define MY_FLOAT_IS_DOUBLE
 
 /* for double or long double, don't need to initialize */
 #define   InitMyFloat(r)            
@@ -153,12 +159,6 @@ typedef double MY_FLOAT;
 
 #endif
 
-/*** MY_JET ***/
-#ifndef _MY_JET_H_
-#define _MY_JET_H_
-
-#define MY_JET_DATA(x,i) ((x)[i])
-
 /*** MY_COEF ***/
 #ifndef _MY_COEF_H_
 #define _MY_COEF_H_
@@ -173,6 +173,12 @@ typedef double MY_FLOAT;
 #define MY_COEF_FUN(x) mycoef_myfloat_ ## x ## _auto
 #endif /* _MY_COEF_H_ */
 
+
+/*** MY_JET ***/
+#ifndef _MY_JET_H_
+#define _MY_JET_H_
+
+#define MY_JET_DATA(x,i) ((x)[i])
 /* HEADER jet_1_t_auto */
 
 #include <stdio.h>
@@ -259,19 +265,32 @@ void jet_1_si_div2_auto(jet_1_t_auto, int, jet_1_t_auto);
 
 /* elemental functions */
 void jet_1_set_sqrt_auto(jet_1_t_auto, jet_1_t_auto);
+//#define jet_1_sqrt_auto jet_1_set_sqrt_auto
 
 void jet_1_set_pow_myfloat_auto(jet_1_t_auto, jet_1_t_auto, MY_FLOAT);
+//#define jet_1_pow_myfloat_auto jet_1_set_pow_myfloat_auto
 
 void jet_1_set_exp_auto(jet_1_t_auto, jet_1_t_auto);
 void jet_1_set_log_auto(jet_1_t_auto, jet_1_t_auto);
+//#define jet_1_exp_auto jet_1_set_exp_auto
+//#define jet_1_log_auto jet_1_set_log_auto
 
 void jet_1_set_sin_auto(jet_1_t_auto, jet_1_t_auto);
 void jet_1_set_cos_auto(jet_1_t_auto, jet_1_t_auto);
 void jet_1_set_tan_auto(jet_1_t_auto, jet_1_t_auto);
 void jet_1_set_atan_auto(jet_1_t_auto, jet_1_t_auto);
+//#define jet_1_sin_auto  jet_1_set_sin_auto
+//#define jet_1_cos_auto  jet_1_set_cos_auto
+//#define jet_1_tan_auto  jet_1_set_tan_auto
+//#define jet_1_atan_auto jet_1_set_atan_auto
 
 void jet_1_set_sinh_auto(jet_1_t_auto, jet_1_t_auto);
 void jet_1_set_cosh_auto(jet_1_t_auto, jet_1_t_auto);
+//#define jet_1_sinh_auto jet_1_set_sinh_auto
+//#define jet_1_cosh_auto jet_1_set_cosh_auto
+
+void jet_1_set_fabs_auto(jet_1_t_auto, jet_1_t_auto);
+//#define jet_1_fabs_auto jet_1_set_fabs_auto
 
 /* I/O handles */
 void jet_1_fprintf_auto(FILE *file, const char *, jet_1_t_auto);
@@ -392,6 +411,18 @@ MY_FLOAT **taylor_coefficients_auto_A(MY_FLOAT t, MY_FLOAT *x, int order, int re
 int       taylor_step_auto(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
                          double log10abserr, double log10relerr,
                          MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut);
+
+int       taylor_uniform_step_auto_tag(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
+                         double log10abserr, double log10relerr,
+                         MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut,int tag);
+
+int       taylor_uniform_step_auto(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
+                         double log10abserr, double log10relerr,
+                         MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut);
+
+int       taylor_step_auto_Twelve(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
+                         double log10abserr, double log10relerr,
+                         MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut, MY_FLOAT ***s_return, MY_JET ***jet_return);
 
 /************************************************************************/
 

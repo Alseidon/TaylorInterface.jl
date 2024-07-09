@@ -1,4 +1,4 @@
-/* taylor Version 2.1, May 26, 2023 */
+/* taylor Version 2.2, Feb 9, 2024 */
 /* Using coef lib: MY_FLOAT */
 /* Using jet lib: jet_1. n symbol, degree 1 */
 #include "taylor-rpb_sun_earth.h"
@@ -33,7 +33,7 @@ computer.
 
 #define DEBUG_LEVEL 0 /* to print some internal information */
 
-int taylor_step_auto(MY_FLOAT *ti,
+int taylor_step_auto_Twelve(MY_FLOAT *ti,
                  MY_FLOAT *x,
                  int      dir,
                  int      step_ctl,
@@ -42,7 +42,9 @@ int taylor_step_auto(MY_FLOAT *ti,
                  MY_FLOAT *endtime,
                  MY_FLOAT *ht,
                  int      *order,
-                 MY_JET   *jetInOut)
+                 MY_JET   *jetInOut,
+                 MY_FLOAT ***s_return,
+                 MY_JET   ***jet_return)
 /*
  * single integration step with taylor method. the parameters are:
  *
@@ -101,6 +103,9 @@ int taylor_step_auto(MY_FLOAT *ti,
  *
  * jetInOut: on input: the value of all declared jet variables
  *           on output: new value of the jet variable, corresponding to the new time
+ *
+ * s_return: return the last computed taylor coefficients if not NULL
+ * jet_return: return the last computed jet coefficients if not NULL
  *
  * return value:
  *  0: ok.
@@ -195,6 +200,8 @@ int taylor_step_auto(MY_FLOAT *ti,
     s=taylor_coefficients_auto_A(*ti,x,nt,0, jetInOut, &jetJetOut); 
  }
 
+ if(s_return) *s_return = s;
+ if(jet_return) *jet_return = jetJetOut;
 /*
   selection of the routine to compute the time step. the value
   step_ctl=3 has been reserved for the user, in case she/he wants to
@@ -301,6 +308,21 @@ int taylor_step_auto(MY_FLOAT *ti,
     }
   return(flag_endtime);
 }
+
+int taylor_step_auto(MY_FLOAT *ti,
+                 MY_FLOAT *x,
+                 int      dir,
+                 int      step_ctl,
+                 double   log10abserr,
+                 double   log10relerr,
+                 MY_FLOAT *endtime,
+                 MY_FLOAT *ht,
+                 int      *order,
+                 MY_JET   *jetInOut)
+{
+  return taylor_step_auto_Twelve(ti,x,dir,step_ctl,log10abserr,log10relerr,endtime,ht,order,jetInOut,NULL,NULL);
+}
+
 int compute_order_1_auto(double xnorm, double log10abserr, double log10relerr, int* flag_err)
 /*
  * this is to determine the 'optimal' degree of the taylor expansion.
@@ -589,6 +611,236 @@ double double_log_MyFloat_auto(MY_FLOAT x)
   return(lx);
 }
 
+int taylor_uniform_step_auto_tag(
+			     MY_FLOAT *ti,
+			     MY_FLOAT *x,
+			     int      dir,
+			     int      step_ctl,
+			     double   log10abserr,
+			     double   log10relerr,
+			     MY_FLOAT *endtime,
+			     MY_FLOAT *ht,
+			     int      *order,
+			     MY_JET   *jetInOut,
+			     int tag)
+/*
+ *  Solve ODE on an equally spaced time grid.
+ *
+ *  parameters:  same as those in taylor_step_auto 
+ *  except the meaning of 'ht' changed.
+ *
+ *   *ht is not changed by this stepper (except make sure it is positive),
+ *   it is used to form a uniform time grid.  In other words, the stepper
+ *   will compute solutions on t0, t0+h, t0+2h, ... .  h = *ht or -*ht
+ *   depending on dir=1 or -1.
+ *   
+ *  If step_ctl=0, this stepper is the same as taylor_step_auto
+ *  Otherwise, it internally use taylor_step_auto with possibly
+ *  very large steps, and evaluate the taylor polynomail on the time grid.
+ *  
+ *  tag: when integrate multiple orbits, tag specifies which orbit we are
+ *  integrating. One still has to integrate consecutively b/c static vars
+ *  are used. 
+ */
+{
+  static MY_FLOAT last_t0, last_t1, target_t, last_h, working_t, working_h, the_h;
+  static MY_FLOAT last_x0[_N_DIM_+1], last_x1[_N_DIM_+1], **last_s, mtmp, h0, zer0;
+  static MY_JET   last_jet0[_J_DIM_+1], last_jet1[_J_DIM_+1], **last_j, jtmp;
+  static int init=0, last_order, last_tag=-1;
+  int i,j,k,nt, ans, compute, ended;
+#pragma omp threadprivate(last_t0,last_t1,target_t,last_h,working_t,working_h, the_h) 
+#pragma omp threadprivate(last_x0,last_x1,last_s,mtmp,h0,zer0)
+#pragma omp threadprivate(last_jet0,last_jet1,last_j,jtmp)
+#pragma omp threadprivate(init,last_order, last_tag)  
+  
+  if(step_ctl == 0)
+    return  taylor_step_auto(ti, x, dir, step_ctl, log10abserr, log10relerr, endtime, ht, order, jetInOut);
+
+  compute = 0;
+  if(init == 0) {
+    init = 1;
+    last_s = NULL;
+    last_j = NULL;
+    InitMyFloat(mtmp);InitMyFloat(h0); InitMyFloat(the_h);
+    InitMyFloat(zer0); MakeMyFloatA(zer0,0.0);   
+    InitMyFloat(last_t0);InitMyFloat(last_t1);
+    InitMyFloat(working_t);InitMyFloat(working_h);
+    InitMyFloat(last_h); InitMyFloat(target_t);
+    xInitUpJet();
+    for(i=0;i<=_N_DIM_;i++) {
+      InitMyFloat(last_x0[i]); InitMyFloat(last_x1[i]);      
+    }
+    for(i=0;i<=_J_DIM_;i++)  {
+      xInitJet(last_jet0[i]); xInitJet(last_jet1[i]);      
+    }
+    xInitJet(jtmp);    
+    compute = 1;    
+  } // init == 0
+
+  if(last_tag != tag) {
+    AssignMyFloat(last_t1, *ti);
+    AssignMyFloat(last_t0, *ti);
+    AssignMyFloat(last_h, *ht);        
+#if _J_DIM_ != 0
+    for(i=0; i<_J_DIM_; i++) {
+      xAssignJetToJet(last_jet0[i],jetInOut[i]);
+      xAssignJetToJet(last_jet1[i],jetInOut[i]);	
+    }
+#endif
+    for(i=_J_DIM_; i<_N_DIM_; i++) {
+      AssignMyFloat(last_x0[i],x[i]);
+      AssignMyFloat(last_x1[i],x[i]);	
+    }
+    if(MyFloatA_LT_B(*ht, zer0)) {
+      NegateMyFloatA(the_h, *ht);
+    } else {
+      AssignMyFloat(the_h, *ht);      
+    }
+    compute = 1;
+    last_tag=tag;
+  }
+  
+  if(dir == -1) {
+    SubtractMyFloatA(target_t, *ti, the_h);
+    if(MyFloatA_LT_B(target_t,last_t1)) {  
+      compute = 1;
+    }
+  } else {
+    AddMyFloatA(target_t, *ti, the_h);
+    if(MyFloatA_GT_B(target_t,last_t1)) {  
+      compute = 1;
+    }
+  }
+
+  ans = 0;
+  if(compute) {
+    // set solver to start at the last computed point on orbit
+    AssignMyFloat(working_t, last_t1);
+    AssignMyFloat(working_h, last_h);    
+#if _J_DIM_ != 0
+    for(i=0; i<_J_DIM_; i++) {
+      xAssignJetToJet(jetInOut[i],last_jet1[i]);
+    }
+#endif
+    for(i=_J_DIM_; i<_N_DIM_; i++) {
+      AssignMyFloat(x[i],last_x1[i]);
+    }
+    
+    do {
+#if _J_DIM_ != 0
+      for(i=0; i<_J_DIM_; i++) {
+	xAssignJetToJet(last_jet0[i],jetInOut[i]);
+      }
+#endif
+      for(i=_J_DIM_; i<_N_DIM_; i++) {
+	AssignMyFloat(last_x0[i],x[i]);
+      }
+      AssignMyFloat(last_t0,working_t);
+      ans = taylor_step_auto_Twelve(&working_t, x, dir, step_ctl, log10abserr, log10relerr, endtime, &working_h, &nt, jetInOut, &last_s, &last_j);
+      last_order = nt;
+      if (order) *order = nt;
+      if( ans < 0 ) {
+	AssignMyFloat(last_t1, working_t);	
+	break;
+      } else {
+	if( (dir == 1 && MyFloatA_GE_B(working_t, target_t)) || (dir == -1 && MyFloatA_LE_B(working_t, target_t))) {
+	  AssignMyFloat(last_t1, working_t);
+	  AssignMyFloat(last_h, working_h);	  
+#if _J_DIM_ != 0
+	  for(i=0; i<_J_DIM_; i++) {
+	    xAssignJetToJet(last_jet1[i],jetInOut[i]);
+	}
+#endif
+	  for(i=_J_DIM_; i<_N_DIM_; i++) {
+	    AssignMyFloat(last_x1[i],x[i]);
+	  }
+	  break;
+	}
+      }
+    } while( ans == 0);
+  }
+
+  if(ans == 1) {
+    ans = 0;
+  }
+  ended = 0;  
+  // evaluate last taylor polynomial -- start
+  if(ans == 0) {
+    AssignMyFloat(mtmp, target_t);
+    if(dir == -1) {
+      if(endtime && MyFloatA_LE_B(mtmp, *endtime)) {
+	AssignMyFloat(mtmp, *endtime);
+	ended = 1;	
+      }
+    } else {
+      if(endtime && MyFloatA_GE_B(mtmp, *endtime)) {
+	AssignMyFloat(mtmp, *endtime);
+	ended = 1;
+      }
+    }
+    SubtractMyFloatA(h0, mtmp, last_t0);          
+    nt = last_order;
+    j=nt-1;
+#if _J_DIM_ != 0
+      for(i=0; i<_J_DIM_; i++)
+	{
+	  xAssignJetToJet(jetInOut[i],last_j[i][nt]);
+	  for(k=j; k>=0; k--)
+	    {
+	      xMultiplyFloatJetA(jtmp, h0, jetInOut[i]);
+	      xAddJetJetA(jetInOut[i], jtmp, last_j[i][k]);
+	    }
+	  xAssignJetToFloat(x[i],jetInOut[i]);
+	}
+#endif
+      for(i=_J_DIM_; i<_N_DIM_; i++)
+	{
+	  AssignMyFloat(x[i],last_s[i][nt]);
+	  for(k=j; k>=0; k--)
+	    {
+	      MultiplyMyFloatA(mtmp, h0, x[i]);
+	      AddMyFloatA(x[i], mtmp, last_s[i][k]);
+	    }
+	}
+  }
+  // evaluate last taylor polynomial -- end
+  
+  if(ans == 0) {
+    if(ended) {
+      AssignMyFloat(*ti, *endtime);
+      ans = 1;
+    } else {
+      AddMyFloatA(*ti, last_t0, h0); // advance ti, do not change *ht
+    }
+  }
+  return(ans);
+}
+int taylor_uniform_step_auto(
+			     MY_FLOAT *ti,
+			     MY_FLOAT *x,
+			     int      dir,
+			     int      step_ctl,
+			     double   log10abserr,
+			     double   log10relerr,
+			     MY_FLOAT *endtime,
+			     MY_FLOAT *ht,
+			     int      *order,
+			     MY_JET   *jetInOut)
+{
+  return taylor_uniform_step_auto_tag(
+		             ti,
+			     x,
+			     dir,
+			     step_ctl,
+			     log10abserr,
+			     log10relerr,
+			     endtime,
+			     ht,
+			     order,
+			     jetInOut,
+			     0);
+}
+
 
 int comp_order_other_auto(double lnxnorm, double log10abserr, double log10relerr){
   puts("---");
@@ -610,9 +862,7 @@ double comp_stepsize_other_auto(MY_FLOAT **s, MY_JET **jet, int nd, int nt, doub
   exit(1);
   return((double)0.00001);
 }
-static int _jet_1_monomial_counts_auto_[]  =      {1,6};
-static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
-/* MACROS TO LINK MY_FLOAT WITH MY_JET COEFFICIENTS */
+/* MACROS TO LINK MY_FLOAT */
 #ifndef myfloat_t
 #define myfloat_t          MY_FLOAT
 
@@ -630,6 +880,13 @@ static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
 #define myfloat_sub2       SubtractMyFloatA
 #define myfloat_mul2       MultiplyMyFloatA
 #define myfloat_div2       DivideMyFloatA
+
+#define myfloat_add2_myfloat     AddMyFloatA
+#define myfloat_sub2_myfloat     SubtractMyFloatA
+#define myfloat_mul2_myfloat     MultiplyMyFloatA
+#define myfloat_div2_myfloat     DivideMyFloatA
+#define myfloat_myfloat_sub2     SubtractMyFloatA
+#define myfloat_myfloat_div2     DivideMyFloatA
 
 #define myfloat_add2_d     AddMyFloatD
 #define myfloat_sub2_d     SubtractMyFloatD
@@ -651,6 +908,7 @@ static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
 #define myfloat_set_sqrt   sqrtMyFloatA
 #define myfloat_set_pow    ExponentiateMyFloatA
 #define myfloat_set_pow_si ExponentiateMyFloatIA
+#define myfloat_set_pow_myfloat myfloat_set_pow
 
 #define myfloat_set_sin    sinMyFloatA
 #define myfloat_set_cos    cosMyFloatA
@@ -663,8 +921,26 @@ static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
 #define myfloat_set_tanh   tanhMyFloatA
 #define myfloat_set_log10  log10MyFloatA
 #define myfloat_set_fabs   fabsMyFloatA
-#define myfloat_to_si      MyFloatToInt
-#define myfloat_to_d       MyFloatToDouble
+
+#define myfloat_sqrt myfloat_set_sqrt
+#define myfloat_pow myfloat_set_pow
+#define myfloat_pow_si myfloat_set_pow_si
+
+#define myfloat_sin myfloat_set_sin
+#define myfloat_cos myfloat_set_cos
+#define myfloat_tan myfloat_set_tan
+#define myfloat_atan myfloat_set_atan
+#define myfloat_exp myfloat_set_exp
+#define myfloat_log myfloat_set_log
+#define myfloat_sinh myfloat_set_sinh
+#define myfloat_cosh myfloat_set_cosh
+#define myfloat_tanh myfloat_set_tanh
+#define myfloat_log10 myfloat_set_log10
+#define myfloat_fabs myfloat_set_fabs
+
+/* casts */
+#define myfloat_to_si  MyFloatToInt
+#define myfloat_to_d   MyFloatToDouble
 
 /* boolean operations */
 #define myfloat_ge  MyFloatA_GE_B
@@ -675,12 +951,14 @@ static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
 #define myfloat_neq MyFloatA_NEQ_B
 
 /* output format */
-#define myfloat_fprintf OutputMyFloat3
+#define myfloat_fprintf3 OutputMyFloat3
 
 /* input format */
 #define myfloat_fscanf InputMyFloat3
 #endif /* END myfloat_t */
 
+
+#define MY_FLOAT_FUN(x) myfloat_ ## x
 
 /* BEGIN PRECODE mycoef_myfloat_t_auto */
 #define mycoef_myfloat_t_auto          MY_COEF
@@ -773,7 +1051,6 @@ static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
 /* string scanf */
 #define mycoef_myfloat_sscanf4_auto StringToMyFloat4
 /* END MY_COEF_MY_FLOAT_BASIC mycoef_myfloat_t_auto */
-
 
 /* BEGIN MY_COEF_MY_FLOAT_BASIC mycoef_myfloat_t_auto */
 #define mycoef_myfloat_initup2_auto(s,d)    
@@ -958,6 +1235,8 @@ static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
  
 /* END MY_COEF_MY_FLOAT_POSTCODE mycoef_myfloat_t_auto */
 
+static int _jet_1_monomial_counts_auto_[]  =      {1,6};
+static int _jet_1_monomial_offsets_auto_[] =      {0,1,7};
 /* MACROS TO LINK MY_COEF */
 #ifndef mycoef_t 
 #define mycoef_t mycoef_t
@@ -1210,7 +1489,8 @@ void jet_1_nrm2_auto(myfloat_t nrm[1], jet_1_t_auto a)
 	int k;
 	/* WARNING initial value for nrm GIVEN!! */
 	for (k = 0; k <= jet_1_nsymb_auto; k++) {
-		mycoef_nrm2(&jet_1_faux_auto,a[k]);
+		mycoef_set_fabs(jet_1_caux_auto,a[k]);
+		mycoef_nrm2(&jet_1_faux_auto,jet_1_caux_auto);
 		myfloat_add2(*nrm,*nrm,jet_1_faux_auto);
 	}
 	myfloat_set_sqrt(*nrm,*nrm);
@@ -1500,6 +1780,11 @@ void jet_1_set_cosh_auto(jet_1_t_auto c, jet_1_t_auto a)
 	mycoef_set_cosh(c[0],a[0]);
 	for (k = 1; k <= jet_1_nsymb_auto; k++) {mycoef_mul2(c[k],jet_1_caux_auto,a[k]);}
 }
+void jet_1_set_fabs_auto(jet_1_t_auto f, jet_1_t_auto a)
+{
+	int k;
+	for (k = 0; k <= jet_1_nsymb_auto; k++) {mycoef_set_fabs(f[k],a[k]);}
+}
 void jet_1_fprintf_auto(FILE *file, const char *fmt, jet_1_t_auto a)
 {
 	int k;
@@ -1537,11 +1822,11 @@ void jet_1_sscanf_auto(const char *str, const char *fmt, jet_1_t_auto a)
  *
  * Procedure generated by the TAYLOR translator. Do not edit!
  *
- * It needs the header file 'taylor.h' to compile.
- * Run taylor with the -header -o taylor.h option to generate a sample 'taylor.h'
+ * It needs the header file 'taylor-rpb_sun_earth.h' to compile.
+ * Run taylor with the -header -o taylor-rpb_sun_earth.h option to generate a sample 'taylor-rpb_sun_earth.h'
 
  * Translation info is at the end of this file.
- * Version 2.1, May 26, 2023
+ * Version 2.2, Feb 9, 2024
  ***********************************************************************/
 
 #include <stdio.h>

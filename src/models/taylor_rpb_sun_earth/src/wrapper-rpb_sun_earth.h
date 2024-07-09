@@ -1,9 +1,9 @@
-#ifndef WRAPPER_rpb_sun_earth_H
-#define WRAPPER_rpb_sun_earth_H
-        
-#include "taylor-rpb_sun_earth.h"
+        #ifndef WRAPPER_rpb_sun_earth_H
+        #define WRAPPER_rpb_sun_earth_H
 
-#include "stdio.h"
+        #include "taylor-rpb_sun_earth.h"
+
+        #include "stdio.h"
 
 void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df);
 

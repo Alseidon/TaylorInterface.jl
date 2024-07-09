@@ -1,4 +1,4 @@
-/* taylor Version 2.1, May 26, 2023 */
+/* taylor Version 2.2, Feb 9, 2024 */
 /* Using coef lib: MY_FLOAT */
 /* No jet */
 /************************************************************************
@@ -28,6 +28,11 @@ extern "C"
 #define _MAX_SIZE_OF_JET_VAR_          1
 #endif
 
+#ifndef _NUMBER_OF_CLOUD_VARS_
+#define _NUMBER_OF_CLOUD_VARS_         0
+#define _MAX_CLOUD_SIZE_               0
+#endif
+
 #ifndef _TAYLOR_H_
 #define _TAYLOR_H_
 typedef double MY_FLOAT;
@@ -42,6 +47,7 @@ typedef double MY_FLOAT;
  *  It may be 'float', 'double' or user defined private data types
  *  like 'long double', 'complex' etc. 
  */
+#define MY_FLOAT_IS_DOUBLE
 
 /* for double or long double, don't need to initialize */
 #define   InitMyFloat(r)            
@@ -158,21 +164,6 @@ typedef double MY_FLOAT;
 #define _MY_JET_H_
 
 
-/*** MY_COEF ***/
-#ifndef _MY_COEF_H_
-#define _MY_COEF_H_
-
-#define _MY_COEF_MAX_NUM_SYMBOLS_ 0
-#define _MY_COEF_MAX_DEGREE_ 0
-#define _MY_COEF_TOTAL_COEFFICIENTS_COUNT_ 1
-#define MY_COEF MY_FLOAT
-
-
-
-#define MY_COEF_FUN(x) mycoef_myfloat_ ## x ## _auto
-#endif /* _MY_COEF_H_ */
-
-
 typedef void* MY_JET;
 
 
@@ -188,6 +179,18 @@ MY_FLOAT **taylor_coefficients_auto_A(MY_FLOAT t, MY_FLOAT *x, int order, int re
 int       taylor_step_auto(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
                          double log10abserr, double log10relerr,
                          MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut);
+
+int       taylor_uniform_step_auto_tag(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
+                         double log10abserr, double log10relerr,
+                         MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut,int tag);
+
+int       taylor_uniform_step_auto(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
+                         double log10abserr, double log10relerr,
+                         MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut);
+
+int       taylor_step_auto_Twelve(MY_FLOAT *ti, MY_FLOAT *x, int dir, int step_ctl,
+                         double log10abserr, double log10relerr,
+                         MY_FLOAT *endtime, MY_FLOAT *ht, int *order, MY_JET *jetInOut, MY_FLOAT ***s_return, MY_JET ***jet_return);
 
 /************************************************************************/
 

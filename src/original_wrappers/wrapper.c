@@ -20,7 +20,7 @@ int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
   tf=endtime;
   taylor_make_identity_jets(xjet,x,NULL,NULL);
   for (i=0; i<_NUMBER_OF_STATE_VARS_; i++) y[i]=x[i]; 
-  if (tf == 0.) return;
+  if (tf == 0.) return 1;
   int flag_ret = 0;
   const int max_steps = 1000;
   for (int i = 0; i < max_steps; i++)
