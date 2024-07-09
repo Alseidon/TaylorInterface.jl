@@ -2,7 +2,7 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
+int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
 {
   static MY_JET xjet[_NUMBER_OF_STATE_VARS_];
   double t,tf;
@@ -22,9 +22,9 @@ void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
   for (i=0; i<_NUMBER_OF_STATE_VARS_; i++) y[i]=x[i]; 
   if (tf == 0.) return;
   int flag_ret = 0;
-  for (int i = 0; i < 1; i++)
+  const int max_steps = 1000;
+  for (int i = 0; i < max_steps; i++)
   {
-    puts("Iterating");
     flag_ret = taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,NULL);
     switch (flag_ret)
     {
@@ -38,21 +38,22 @@ void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
         break;
 
     case 1:
-        return;
+        for (i=0; i<_NUMBER_OF_STATE_VARS_; i++)
+          for (j=0; j<_MAX_SIZE_OF_JET_VAR_; j++)
+            df[i*_NUMBER_OF_STATE_VARS_+j]=xjet[i][j+1];
+        return 1;
         break;
     
     default:
         puts("Unrecognized return value");
         printf("Unrecognized return value: %i", flag_ret);
-        exit(1);
+        //exit(1);
+        return flag_ret;
         break;
     }
-    puts("end");
   }
-  for (i=0; i<_NUMBER_OF_STATE_VARS_; i++)
-    for (j=0; j<_MAX_SIZE_OF_JET_VAR_; j++)
-      df[i*_NUMBER_OF_STATE_VARS_+j]=xjet[i][j+1];
-  return;
+  printf("Couldn't finish in %i steps", max_steps);
+  return 0;
 }
 
 int tstep(MY_FLOAT *ti, MY_FLOAT *x, double log10err, MY_FLOAT *endtime)
