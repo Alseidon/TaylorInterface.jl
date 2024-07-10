@@ -1,6 +1,7 @@
 module TaylorInterface
 
 include("taylor_gen.jl")
+include("integration_functions.jl")
 
 export TaylorGenerator, TaylorHandler
 export get_model, get_taylor_dir
@@ -8,6 +9,7 @@ export generate_dir, compile_eqs
 export get_handler
 export open_lib, close_lib
 export is_open, check_open
+export flow, flow!
 
 function __regenerate_model_dirs(check=true)
     eqfiles = readdir(joinpath(get_models_dir(), "eqs"), join=true)

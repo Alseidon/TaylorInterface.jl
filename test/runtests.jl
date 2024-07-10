@@ -30,3 +30,5 @@ using Test
     TaylorInterface.clear_dir(gen_jet)
     TaylorInterface.clear_dir(gen_no_jet)
 end
+
+include("integration_tests.jl")

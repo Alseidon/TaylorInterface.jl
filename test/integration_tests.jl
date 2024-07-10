@@ -3,14 +3,6 @@
     gen = TaylorGenerator("sincos", "sincos.eqs", ".")
     generate_dir(gen)
     han = get_handler(gen, true)
-
-    function flow(x, t, han)
-        y = similar(x)
-        ccall(han.symbols["flow"], Cint, (Cdouble, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cvoid}),
-            t, x, y, Ref(nothing)
-        )
-        return y
-    end
     
     x = [1., 0.]
     ts = LinRange(0., 2π, 101)
@@ -20,4 +12,6 @@
 
     @test y1 ≈ cos.(ts)
     @test y2 ≈ -sin.(ts)
+    close_lib(han)
+    TaylorInterface.clear_dir(gen)
 end
