@@ -1,0 +1,2 @@
+diff(x, t) = y;
+diff(y, t) = -x;
