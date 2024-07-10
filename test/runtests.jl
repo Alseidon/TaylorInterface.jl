@@ -1,7 +1,7 @@
 using TaylorInterface
 using Test
 
-@testset "TaylorInterface.jl" begin
+@testset "Opening, closing, creating models" begin
     #= DEFAULT MODELS =#
     default_models = map(
         s->s[8:end],
@@ -20,7 +20,7 @@ using Test
     )
     gen_no_jet = TaylorGenerator(
         eqs_filename = joinpath(TaylorInterface.get_models_dir(),
-            "eqs", "rpb_nojet.eqs"),
+            "eqs", "rpb_SE_nojet.eqs"),
         parent_path = tempdir()
     )
     generate_dir(gen_jet)
