@@ -33,14 +33,16 @@ int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *__unused)
         break;
     
     default:
-        puts("Unrecognized return value");
         printf("Unrecognized return value: %i", flag_ret);
+        fflush(stdout);
         //exit(1);
         return flag_ret;
         break;
     }
   }
   printf("Couldn't finish in %i steps", max_steps);
+  printf("Time: %f / %f ", t, tf);
+  fflush(stdout);
   return 0;
 }
 

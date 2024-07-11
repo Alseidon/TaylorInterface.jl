@@ -13,9 +13,9 @@ export flow, flow!
 
 function __regenerate_model_dirs(check=true)
     eqfiles = readdir(joinpath(get_models_dir(), "eqs"), join=true)
-    modelnames = map(i->split(i, ['.', '/'])[2], eqfiles)
+    modelnames = map(i->split(i, ['.', '/'])[end-1], eqfiles)
     gens = map(
-        (name, eqfile)->TaylorGenerator(name, eqfile, "."),
+        (name, eqfile)->TaylorGenerator(name, eqfile, get_models_dir()),
         modelnames, eqfiles
     )
     map(generate_dir, gens)
