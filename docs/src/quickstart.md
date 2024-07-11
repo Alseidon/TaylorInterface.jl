@@ -64,6 +64,18 @@ ccall(
 reshape(jacobian, (2, 2))
 ```
 
+For convenience, we also provide the `flow!` functions in Julia. This is equivalent to the code above:
+
+```julia
+in = [0., 1.]
+out = zero(in)
+jacobian = zeros(4)
+
+flow!(handler, in, out, 1., jacobian) # ccall inside
+
+reshape(jacobian, (2, 2))
+```
+
 And finally, we can close our library:
 
 ```julia

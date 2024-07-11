@@ -50,6 +50,16 @@ is_open
 check_open
 ```
 
+## Integration functions
+
+```@docs
+flow!
+```
+
+```@docs
+flow
+```
+
 ## Default models
 
 ```@docs
