@@ -1,0 +1,4 @@
+diff(x, t) = y;
+diff(y, t) = -x;
+
+jet x, y symbols 2 deg 1;

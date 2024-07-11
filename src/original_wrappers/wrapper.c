@@ -25,7 +25,7 @@ int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
   const int max_steps = 1000;
   for (int i = 0; i < max_steps; i++)
   {
-    flag_ret = taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,NULL);
+    flag_ret = taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,xjet);
     switch (flag_ret)
     {
     case -1:
