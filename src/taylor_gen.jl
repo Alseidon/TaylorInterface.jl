@@ -140,11 +140,11 @@ function get_wrappers(gen::TaylorGenerator)
 end
 
 """
-    generate_dir(generator)
+    generate_dir(generator, silent=false)
 
-Generates the directory corresponding to the generator, and builds the library.
+Generates the directory corresponding to the generator, and builds the library. If `silent` is `true`, command will be silent apart from errors.
 """
-function generate_dir(gen::TaylorGenerator)
+function generate_dir(gen::TaylorGenerator, silent=false)
     name = gen.name
     dir = get_taylor_dir(gen)
     curr_dir = pwd()
@@ -220,21 +220,22 @@ function generate_dir(gen::TaylorGenerator)
     end
 
     # RUN MAKEFILE
-    compile_eqs(gen)
+    compile_eqs(gen, silent)
     return
 end
 
 """
-    compile_eqs(generator)
+    compile_eqs(generator, silent=false)
 
-Runs `make` in the directory of the generator.
+Runs `make` in the directory of the generator. If `silent` is `true`, runs `make -s`, thus being silent (apart from errors).
 """
-function compile_eqs(gen::TaylorGenerator)
+function compile_eqs(gen::TaylorGenerator, silent=false)
     dir = get_taylor_dir(gen)
     curr_dir = pwd()
     cd(dir)
+    make_cmd = silent ? `make -s` : `make`
     try
-        run(`make`)
+        run(make_cmd)
     finally
         cd(curr_dir)
     end
@@ -242,16 +243,17 @@ function compile_eqs(gen::TaylorGenerator)
 end
 
 """
-    compile_eqs(handler)
+    compile_eqs(handler, silent=false)
 
-Runs `make` in the directory of the handler.
+Runs `make` in the directory of the handler. If `silent` is `true`, runs `make -s`, thus being silent (apart from errors).
 """
-function compile_eqs(handler::TaylorHandler)
+function compile_eqs(handler::TaylorHandler, silent=false)
     dir = handler.path
     curr_dir = pwd()
     cd(dir)
+    make_cmd = silent ? `make -s` : `make`
     try
-        run(`make`)
+        run(make_cmd)
     finally
         cd(curr_dir)
     end

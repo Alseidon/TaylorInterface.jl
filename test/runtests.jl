@@ -8,7 +8,7 @@ using Test
         filter(s->s[1:min(length(s), 7)] == "taylor_", readdir(TaylorInterface.get_models_dir()))
     )
     handlers = map(name->get_model(name, false), default_models)
-    map(compile_eqs, handlers)
+    map(han->compile_eqs(han, true), handlers)
     map(open_lib, handlers)
     map(close_lib, handlers)
 
@@ -23,8 +23,8 @@ using Test
             "eqs", "rpb_SE_nojet.eqs"),
         parent_path = tempdir()
     )
-    generate_dir(gen_jet)
-    generate_dir(gen_no_jet)
+    generate_dir(gen_jet, true)
+    generate_dir(gen_no_jet, true)
     hand_jet = get_handler(gen_jet, true)
     hand_no_jet = get_handler(gen_no_jet, true)
     TaylorInterface.clear_dir(gen_jet)

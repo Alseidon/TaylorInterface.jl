@@ -1,7 +1,7 @@
 @testset "Integration test -- no jet" begin
     #= NO JET =#
     gen = TaylorGenerator("sincos", "sincos.eqs", ".")
-    generate_dir(gen)
+    generate_dir(gen, true)
     han = get_handler(gen, true)
     
     x = [1., 0.]
@@ -19,7 +19,7 @@ end
 @testset "Integration test -- jet" begin
     #= NO JET =#
     gen = TaylorGenerator("sincos_jet", "sincos_jet.eqs", ".")
-    generate_dir(gen)
+    generate_dir(gen, true)
     han = get_handler(gen, true)
     
     x = [1., 0.]
