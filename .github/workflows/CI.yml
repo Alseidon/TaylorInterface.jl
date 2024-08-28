@@ -33,7 +33,7 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/taylor.gpg] http://web.ma.utexas.edu/repos/deb focal main" | sudo tee /etc/apt/sources.list.d/taylor.list
           sudo apt-get update
           sudo apt-get install taylor
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
