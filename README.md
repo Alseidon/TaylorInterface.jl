@@ -23,13 +23,13 @@ You can simply install this package from the Julia REPL, using Pkg. Run Julia, e
 
 ```julia
 julia> ]
-(v1.10) pkg> add https://github.com/Alseidon/TaylorInterface.jl
+(v1.10) pkg> add TaylorInterface
 ```
 
 Otherwise, you can run
 ```julia
 import Pkg
-Pkg.add(url="https://github.com/Alseidon/TaylorInterface.jl")
+Pkg.add("TaylorInterface")
 ```
 
 You also need the taylor tool installed to use this package. You can find it [here (latest version)](https://github.com/joang/taylor2-dist) or install it by running:
