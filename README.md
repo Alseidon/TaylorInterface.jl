@@ -23,7 +23,7 @@ You can simply install this package from the Julia REPL, using Pkg. Run Julia, e
 
 ```julia
 julia> ]
-(v1.9) pkg> add https://github.com/Alseidon/TaylorInterface.jl
+(v1.10) pkg> add https://github.com/Alseidon/TaylorInterface.jl
 ```
 
 Otherwise, you can run
