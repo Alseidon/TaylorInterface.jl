@@ -1,7 +1,7 @@
 name = "TaylorInterface"
 uuid = "628e9319-2ed5-413a-8fcb-ba6034deb837"
 authors = ["Alseidon <alexandre.prieur@obspm.fr> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
