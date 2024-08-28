@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Compared benchmark · TaylorInterface.jl</title><meta name="title" content="Compared benchmark · TaylorInterface.jl"/><meta property="og:title" content="Compared benchmark · TaylorInterface.jl"/><meta property="twitter:title" content="Compared benchmark · TaylorInterface.jl"/><meta name="description" content="Documentation for TaylorInterface.jl."/><meta property="og:description" content="Documentation for TaylorInterface.jl."/><meta property="twitter:description" content="Documentation for TaylorInterface.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">TaylorInterface.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../quickstart/">Quick start</a></li><li><a class="tocitem" href="../introduction/">Introduction</a></li><li class="is-active"><a class="tocitem" href>Compared benchmark</a><ul class="internal"><li><a class="tocitem" href="#Running-the-code"><span>Running the code</span></a></li><li><a class="tocitem" href="#Results"><span>Results</span></a></li></ul></li><li><a class="tocitem" href="../internals/">Internals</a></li><li><a class="tocitem" href="../fulldocs/">Full documentation</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Compared benchmark</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Compared benchmark</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Alseidon/TaylorInterface.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Alseidon/TaylorInterface.jl/blob/main/docs/src/speed.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Compared-benchmarks"><a class="docs-heading-anchor" href="#Compared-benchmarks">Compared benchmarks</a><a id="Compared-benchmarks-1"></a><a class="docs-heading-anchor-permalink" href="#Compared-benchmarks" title="Permalink"></a></h1><h2 id="Running-the-code"><a class="docs-heading-anchor" href="#Running-the-code">Running the code</a><a id="Running-the-code-1"></a><a class="docs-heading-anchor-permalink" href="#Running-the-code" title="Permalink"></a></h2><p>You can run the following code to compare <code>DifferentialEquations.jl</code> and <code>TaylorInterface.jl</code></p><pre><code class="language-julia hljs">using DifferentialEquations, TaylorInterface, BenchmarkTools
+# import Pkg; Pkg.add(url=&quot;https://github.com/Alseidon/TaylorInterface.jl&quot;)
+# If you haven&#39;t installed TaylorInterface
+
+# The problem
+f(u, p, t) = 0.0001 * u
+u0 = 1 / 2
+t_fin = 100.
+
+# TaylorInterface
+tmp_eqfile = tempname()
+eqfile_text = &quot;&quot;&quot;
+diff(x, t) = 0.0001 * x
+&quot;&quot;&quot;
+open(tmp_eqfile, &quot;w&quot;) do file
+    write(file, eqfile_text)
+end
+
+taylor_gen = TaylorGenerator(eqs_filename=tmp_eqfile, parent_path=tempdir())
+generate_dir(taylor_gen)
+
+handler = get_handler(taylor_gen, true)
+
+function f_taylor(
+    u_ini::Float64,
+    dict::Dict{String, Ptr{Nothing}},
+    t::Number;
+)
+    u_ref = Ref{Cdouble}(u_ini)
+    ti = Ref{Cdouble}(0.)
+    endtime = Ref{Cdouble}(t)
+    return_val = 0
+    while (return_val != 1)
+        return_val = ccall(
+            dict[&quot;tstep&quot;],
+            Cint,
+            (Ptr{Cdouble}, Ref{Cdouble}, Cdouble, Ref{Cdouble}),
+            ti,
+            u_ref,
+            -16.,
+            endtime,
+        )
+    end
+    return u_ref.x
+end
+
+# DifferentialEquations
+function f_diffeq(u0, func, t)
+    prob = ODEProblem(func, u0, (0., t))
+    return solve(prob, reltol = 1e-16, abstol = 1e-16)[end]
+end
+
+
+# TESTING
+## Warmup lap
+f_taylor(u0, handler.symbols, t_fin)
+f_diffeq(u0, f, t_fin) 
+
+## Tests
+@benchmark f_taylor($(u0), $(handler.symbols), $(t_fin))
+@benchmark f_diffeq($(u0), $(f), $(t_fin)) </code></pre><h2 id="Results"><a class="docs-heading-anchor" href="#Results">Results</a><a id="Results-1"></a><a class="docs-heading-anchor-permalink" href="#Results" title="Permalink"></a></h2><p>On a AMD Ryzen 7 3700U, <code>f_taylor</code> runs in 184.488 ns ± 92.744 ns, whereas <code>f_diffeq</code> runs in 29.223 μs ± 75.737 μs.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../introduction/">« Introduction</a><a class="docs-footer-nextpage" href="../internals/">Internals »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.6.0 on <span class="colophon-date" title="Wednesday 28 August 2024 16:08">Wednesday 28 August 2024</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
