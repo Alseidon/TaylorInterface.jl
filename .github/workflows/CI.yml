@@ -18,9 +18,9 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - 'stable'
-          - 'release'
-          - 'nightly'
+          - 'lts'
+          - '1.0'
+          - 'pre'
         os:
           - ubuntu-latest
         arch:
