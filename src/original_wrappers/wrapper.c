@@ -39,8 +39,8 @@ int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
 
     case 1:
         for (i=0; i<_NUMBER_OF_STATE_VARS_; i++)
-          for (j=0; j<_MAX_SIZE_OF_JET_VAR_; j++)
-            df[i*_NUMBER_OF_STATE_VARS_+j]=xjet[i][j+1];
+          for (j=0; j<_MAX_SIZE_OF_JET_VAR_-1; j++)
+            df[i*(_MAX_SIZE_OF_JET_VAR_-1)+j]=xjet[i][j+1];
         return 1;
         break;
     
