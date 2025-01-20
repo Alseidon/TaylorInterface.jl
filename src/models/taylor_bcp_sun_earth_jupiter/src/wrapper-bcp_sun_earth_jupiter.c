@@ -31,7 +31,8 @@ int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
     {
     case -1:
         puts("Encountered error; exiting");
-        exit(1);
+        // exit(1);
+        return -1;
         break;
     
     case 0:
