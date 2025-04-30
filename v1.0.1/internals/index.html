@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Internals · TaylorInterface.jl</title><meta name="title" content="Internals · TaylorInterface.jl"/><meta property="og:title" content="Internals · TaylorInterface.jl"/><meta property="twitter:title" content="Internals · TaylorInterface.jl"/><meta name="description" content="Documentation for TaylorInterface.jl."/><meta property="og:description" content="Documentation for TaylorInterface.jl."/><meta property="twitter:description" content="Documentation for TaylorInterface.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">TaylorInterface.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../quickstart/">Quick start</a></li><li><a class="tocitem" href="../introduction/">Introduction</a></li><li><a class="tocitem" href="../speed/">Compared benchmark</a></li><li class="is-active"><a class="tocitem" href>Internals</a><ul class="internal"><li><a class="tocitem" href="#The-structure-of-a-taylor-directory"><span>The structure of a taylor directory</span></a></li><li><a class="tocitem" href="#cfunctions"><span>C functions</span></a></li></ul></li><li><a class="tocitem" href="../fulldocs/">Full documentation</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Internals</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Internals</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Alseidon/TaylorInterface.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Alseidon/TaylorInterface.jl/blob/main/docs/src/internals.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="internals"><a class="docs-heading-anchor" href="#internals">Internals</a><a id="internals-1"></a><a class="docs-heading-anchor-permalink" href="#internals" title="Permalink"></a></h1><h2 id="The-structure-of-a-taylor-directory"><a class="docs-heading-anchor" href="#The-structure-of-a-taylor-directory">The structure of a taylor directory</a><a id="The-structure-of-a-taylor-directory-1"></a><a class="docs-heading-anchor-permalink" href="#The-structure-of-a-taylor-directory" title="Permalink"></a></h2><p>A taylor directory is structured as such:</p><pre><code class="nohighlight hljs">taylor_ΝAME/
+├── lib.so
+├── Makefile
+├── eq_file.txt
+└── src
+    ├── taylor-ΝAME.c
+    ├── taylor-ΝAME.h
+    ├── taylor-ΝAME.o
+    ├── wrapper-ΝAME.c
+    ├── wrapper-ΝAME.h
+    └── wrapper-ΝAME.o</code></pre><p>The equation file is a copy of the one given to the <code>TaylorGenerator</code>. The <code>Makefile</code> contains all the recipes necessary to call taylor and compile the resulting files. taylor generates the <code>taylor-NAME.c/h</code> files, which are included by the <code>wrapper-NAME.c/h</code> files. Then, gcc compiles all theses files into <code>.o</code> files, then into <code>lib.so</code>. This final file is the shared library that is opened in Julia.</p><h2 id="cfunctions"><a class="docs-heading-anchor" href="#cfunctions">C functions</a><a id="cfunctions-1"></a><a class="docs-heading-anchor-permalink" href="#cfunctions" title="Permalink"></a></h2><h3 id="The-full-taylor_step-function"><a class="docs-heading-anchor" href="#The-full-taylor_step-function">The full taylor_step function</a><a id="The-full-taylor_step-function-1"></a><a class="docs-heading-anchor-permalink" href="#The-full-taylor_step-function" title="Permalink"></a></h3><p>The main function defined in the taylor-generated files is <code>taylor_step_auto</code> : this function computes a step of the numerical integration (cf. the <a href="https://github.com/joang/taylor2-dist/blob/main/src/manual/manual.pd">taylor manual</a> for more information). Its call signature is</p><pre><code class="language-C hljs">int taylor_step_auto(MY_FLOAT *ti,
+                 MY_FLOAT *x,
+                 int      dir,
+                 int      step_ctl,
+                 double   log10abserr,
+                 double   log10relerr,
+                 MY_FLOAT *endtime,
+                 MY_FLOAT *ht,
+                 int      *order,
+                 MY_JET   *jetInOut)</code></pre><p><code>MY_FLOAT</code> is the number type defined for taylor (double by default). Here is its documentation:</p><pre><code class="nohighlight hljs">single integration step with taylor method. the parameters are:
+ti: on input:  time of the initial condition
+    on output: new time
+x:  on input:  initial condition
+    on output: new condition, corresponding to the (output) time ti
+dir: flag to integrate forward or backwards.
+    1: forward
+   -1: backwards
+    WARNING: this flag is ignored if step_ctl (see below) is set to 0.
+step_ctl: flag for the step size control. the possible values are:
+    0: no step size control, so the step and order are provided by
+       the user. the parameter ht is used as step, and the parameter
+       order (see below) is used as the order.
+    1: standard stepsize control. it uses an approximation to the
+       optimal order and to the radius of convergence of the series
+       to approximate the &#39;optimal&#39; step size. It tries to keep
+       either the absolute or the relative errors below the given
+       values. See the paper for more details.
+    2: as 1, but adding an extra condition on the stepsize h: the
+       terms of the series --after being multiplied by the suitable
+       power of h-- cannot grow.
+   -1: user defined stepsize control. the code has to be included
+       in the routine compute_timestep_user_defined (you can find
+       this routine below). The user should also provide code for
+       the selection of degree (see the function
+       compute_order_user_defined below).
+log10abserr: decimal log of the absolute accuracy. the routine
+    tries to keep either the absolute or the relative errors below
+    the given thresholds.
+log10relerr: decimal log of the relative accuracy. the routine
+    tries to keep either the absolute or the relative errors below
+    the given thresholds.
+endtime: if NULL, it is ignored. if step_ctl (see above) is set
+    to 0, it is also ignored. otherwise, if the step size is too
+    large, it is reduced so that the new time ti is exactly endtime
+    (in that case, the function returns 1).
+ht: on input:  ignored/used as a time step (see parameter step_ctl)
+    on output: time step used if the pointer is not NULL
+order: degree of the taylor expansion.
+       input: this parameter is only used if step_ctl is 0,
+              or if you add the code for the case step_ctl=3.
+              its possible values are:
+              &lt; 2: the program will select degree 2 (if step_ctl is 0).
+              &gt;=2: the program will use this degree (if step_ctl is 0).
+       ouput: degree used if the pointer is not NULL
+jetInOut: on input: the value of all declared jet variables
+          on output: new value of the jet variable, corresponding to the new time
+return value:
+ 0: ok.
+ 1: ok, and ti=endtime.  
+-1: not ok, unable to compute step size.  double_log  underflow/overflow</code></pre><p>You can use it directly (it is included in the <code>lib.so</code>), but it requires some initialisation beforehand if jet transport is at play, or if the number type isn&#39;t double. taylor defines the <code>InitMyFloat(x)</code> function to initialize any <code>MY_FLOAT</code> variable. For jet transport, you need to call <code>taylor_initialize_jet_library()</code> before using it, and <code>InitJet(x)</code> on your jet variables. You can refer to <code>wrapper.h</code> for an example of the latter case.</p><h3 id="wrapping_funcs"><a class="docs-heading-anchor" href="#wrapping_funcs">The wrapping functions</a><a id="wrapping_funcs-1"></a><a class="docs-heading-anchor-permalink" href="#wrapping_funcs" title="Permalink"></a></h3><p><code>TaylorInterface.jl</code> adds some convenience functions in the wrapper. First are two simplified versions of <code>taylor_step_auto</code>: <code>tstep</code> and <code>tstep_reverse</code> (respectively when <code>*endtime</code> is positive or negative)</p><pre><code class="language-C hljs">int tstep(MY_FLOAT *ti, MY_FLOAT *x, double log10err, MY_FLOAT *endtime);
+
+int tstep_reverse(MY_FLOAT *ti, MY_FLOAT *x, double log10err, MY_FLOAT *endtime);</code></pre><p>They simply hide some of <code>taylor_step_auto</code>&#39;s parameters, and regroup <code>log10abserr</code> and <code>log10relerr</code>.</p><p>Finally, we include a Poincaré map from 0. to <code>endtime</code>:</p><pre><code class="language-C hljs">void flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df);</code></pre><p>Where <code>x</code> is the initial state, <code>y</code> stores the final state and <code>df</code> stores the non-zero degree jet transport values.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../speed/">« Compared benchmark</a><a class="docs-footer-nextpage" href="../fulldocs/">Full documentation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.2 on <span class="colophon-date" title="Wednesday 30 April 2025 09:52">Wednesday 30 April 2025</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
