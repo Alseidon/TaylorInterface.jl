@@ -12,7 +12,7 @@ function flow!(han, x, y, t, df)
         t, x, y, df
     )
     if retval != 1
-        @error "return value wasn't 1, but $retval"
+        error("return value wasn't 1, but $retval")
     end
     return y
 end
