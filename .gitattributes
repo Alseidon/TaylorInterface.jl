@@ -1,2 +1,2 @@
-src/models/*.c linguist-detectable=false
-src/models/*.h linguist-detectable=false
+src/models/** linguist-detectable=false
+src/models/** linguist-detectable=false
