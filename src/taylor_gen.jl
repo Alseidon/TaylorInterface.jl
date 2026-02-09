@@ -263,7 +263,7 @@ function generate_dir(gen::TaylorGenerator, silent=false)
             cwraptext = read(cwrap, String)
             open("src/wrapper-$(name).c", "w") do cwrap
                 write(cwrap, "#include \"wrapper-$(name).h\"\n")
-                write(cwrap, pre_wrapper_c)
+                write(cwrap, read(joinpath(get_dir_src(), pre_wrapper_c), String))
                 write(cwrap, extern_vars_c)
                 write(cwrap, cwraptext)
             end
@@ -277,7 +277,7 @@ function generate_dir(gen::TaylorGenerator, silent=false)
         
                 #include "taylor-$(name).h"\n
                 """)
-                write(hwrap, pre_wrapper_h)
+                write(hwrap, read(joinpath(get_dir_src(), pre_wrapper_h), String))
                 write(hwrap, extern_vars_h)
                 write(hwrap, hwraptext)
             end    
