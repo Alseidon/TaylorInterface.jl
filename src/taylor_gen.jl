@@ -412,13 +412,26 @@ function set_extern_var(handler::TaylorHandler, var_name, new_value)
     )
 end
 
-function set_extern_arr(handler::TaylorHandler, arr_name, arr_pos, new_value)
+function set_extern_arr_i(handler::TaylorHandler, arr_name, arr_pos, new_value)
     if !is_open(handler)
         error("Handler isn't open")
     end
-    sym = Libdl.dlsym(lib, Symbol("set_" * arr_name))
+    sym = Libdl.dlsym(handler.lib, Symbol("set_" * arr_name))
     ccall(
         sym, Cvoid, (Cdouble, Cint),
         new_value, arr_pos
     )
+end
+
+function set_extern_arr(handler::TaylorHandler, arr_name, new_arr)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("set_" * arr_name))
+    for i in eachindex(new_arr)
+        ccall(
+            sym, Cvoid, (Cdouble, Cint),
+            new_arr[i], i
+        )
+    end
 end
