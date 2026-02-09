@@ -142,7 +142,7 @@ end
 is_sep(c) = isspace(c) || c == ',' ||  c == ';'
 
 function get_external_variables(gen::TaylorGenerator)
-    vars = Tuple{String, String}[]
+    vars = Tuple{String, String, Int64}[]
     open(gen.eqs_filename, "r") do file
         for line in eachline(file)
             if length(line) > 6 && view(line, 1:6) == "extern"
@@ -151,11 +151,12 @@ function get_external_variables(gen::TaylorGenerator)
                 for vname in varnames
                     left_bracket = findfirst(==('['), vname)
                     if left_bracket === nothing
-                        push!(vars, (type, vname))
+                        push!(vars, (type, vname, -1))
                     else
                         push!(vars, (
-                            type * vname[left_bracket:end],
-                            vname[1:left_bracket-1]
+                            type,
+                            vname[1:left_bracket-1],
+                            parse(Int64, vname[left_bracket+1:end-1])
                         ))
                     end
                 end
@@ -163,6 +164,36 @@ function get_external_variables(gen::TaylorGenerator)
         end
     end
     return vars
+end
+
+function get_extern_var_code(var_type, var_name)
+    c_code = """
+    void set_$var_name($var_type new_value) {
+        $var_name = new_value;
+    }
+    """
+    h_code = "$var_type $var_name;\n"
+    return c_code, h_code
+end
+
+function get_extern_arr_code(var_type, var_name, var_size)
+    c_code = """
+    void set_$var_name($var_type new_value, int i) {
+        $var_name[i] = new_value;
+    }
+    """
+    h_code = "$var_type[$var_size] $var_name;\n"
+    return c_code, h_code
+end
+
+function get_external_code(external_vars)
+    return reduce(
+        (a, b)->(a[1]*b[1], a[2]*b[2]),
+        map(
+            tup->(tup[3] == -1 ? get_extern_var_code(tup[1], tup[2]) : get_extern_arr_code(tup[1], tup[2], tup[3])),
+            external_vars
+        )
+    )
 end
 
 """
