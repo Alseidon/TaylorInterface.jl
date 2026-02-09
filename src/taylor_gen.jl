@@ -191,13 +191,12 @@ function get_extern_arr_code(var_type, var_name, var_size)
 end
 
 function get_external_code(external_vars)
-    return reduce(
+    return isempty(external_vars) ? ("", "") : reduce(
         (a, b)->(a[1]*b[1], a[2]*b[2]),
         map(
             tup->(tup[3] == -1 ? get_extern_var_code(tup[1], tup[2]) : get_extern_arr_code(tup[1], tup[2], tup[3])),
             external_vars
         );
-        init=("", "")
     ) .* '\n'
 end
 

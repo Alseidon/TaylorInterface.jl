@@ -1,0 +1,65 @@
+#include "wrapper-perturbation.h"
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
+void set_e1(MY_FLOAT new_value) { e1 = new_value; }
+void set_e2(MY_FLOAT new_value) { e2 = new_value; }
+void set_coef(MY_FLOAT new_value, int i) { coef[i] = new_value; }
+void set_freq(MY_FLOAT new_value, int i) { freq[i] = new_value; }
+
+int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *__unused)
+{
+  double t,tf;
+  int i;
+  int direction = (endtime > 0);
+  t=0;
+  tf=endtime;
+  for (i=0; i<_NUMBER_OF_STATE_VARS_; i++) y[i]=x[i]; 
+  if (tf == 0.) return 1;
+  int flag_ret = 0;
+  const int max_steps = 1000;
+  for (int i = 0; i < max_steps; i++)
+  {
+    flag_ret = taylor_step_auto(&t,y,direction,2,-16,-16,&tf,NULL,NULL,NULL);
+    switch (flag_ret)
+    {
+    case -1:
+        puts("Encountered error; exiting");
+        //exit(1);
+        return -1;
+        break;
+    
+    case 0:
+        continue;
+        break;
+
+    case 1:
+        return 1;
+        break;
+    
+    default:
+        printf("Unrecognized return value: %i", flag_ret);
+        fflush(stdout);
+        //exit(1);
+        return flag_ret;
+        break;
+    }
+  }
+  printf("Couldn't finish in %i steps", max_steps);
+  printf("Time: %f / %f ", t, tf);
+  fflush(stdout);
+  return 0;
+}
+
+int tstep(MY_FLOAT *ti, MY_FLOAT *x, double log10err, MY_FLOAT *endtime)
+{
+  int ret_val = taylor_step_auto(ti,x,1,2,log10err,log10err,endtime,NULL,NULL,NULL);
+  return ret_val;
+}
+
+int tstep_reverse(MY_FLOAT *ti, MY_FLOAT *x, double log10err, MY_FLOAT *endtime)
+{
+  int ret_val = taylor_step_auto(ti,x,-1,2,log10err,log10err,endtime,NULL,NULL,NULL);
+  return ret_val;
+}
