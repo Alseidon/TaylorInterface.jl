@@ -139,6 +139,9 @@ function get_wrappers(gen::TaylorGenerator)
     end
 end
 
+get_pre_wrappers(gen::TaylorGenerator) = "original_wrappers/pre_wrapper.c", "original_wrappers/pre_wrapper.h"
+
+
 is_sep(c) = isspace(c) || c == ',' ||  c == ';'
 
 function get_external_variables(gen::TaylorGenerator)
@@ -192,7 +195,8 @@ function get_external_code(external_vars)
         map(
             tup->(tup[3] == -1 ? get_extern_var_code(tup[1], tup[2]) : get_extern_arr_code(tup[1], tup[2], tup[3])),
             external_vars
-        )
+        );
+        init=("", "")
     )
 end
 
@@ -207,6 +211,8 @@ function generate_dir(gen::TaylorGenerator, silent=false)
     curr_dir = pwd()
     jet_flag = get_jet_flag(gen)
     wrapper_c, wrapper_h = get_wrappers(gen)
+    pre_wrapper_c, pre_wrapper_h = get_pre_wrappers(gen)
+    extern_vars_c, extern_vars_h = get_external_variables(gen) |> get_external_code
     if isdir(dir)
         @warn "$(dir) already exists. Cleaning..."
         clear_dir(gen)
@@ -257,6 +263,8 @@ function generate_dir(gen::TaylorGenerator, silent=false)
             cwraptext = read(cwrap, String)
             open("src/wrapper-$(name).c", "w") do cwrap
                 write(cwrap, "#include \"wrapper-$(name).h\"\n")
+                write(cwrap, pre_wrapper_c)
+                write(cwrap, extern_vars_c)
                 write(cwrap, cwraptext)
             end
         end
@@ -269,6 +277,8 @@ function generate_dir(gen::TaylorGenerator, silent=false)
         
                 #include "taylor-$(name).h"\n
                 """)
+                write(hwrap, pre_wrapper_h)
+                write(hwrap, extern_vars_h)
                 write(hwrap, hwraptext)
             end    
         end
