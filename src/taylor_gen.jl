@@ -139,6 +139,32 @@ function get_wrappers(gen::TaylorGenerator)
     end
 end
 
+is_sep(c) = isspace(c) || c == ',' ||  c == ';'
+
+function get_external_variables(gen::TaylorGenerator)
+    vars = Tuple{String, String}[]
+    open(gen.eqs_filename, "r") do file
+        for line in eachline(file)
+            if length(line) > 6 && view(line, 1:6) == "extern"
+                type = split(line, ' '; limit=3, keepempty=false)[2]
+                varnames = split(line, is_sep; keepempty=false)[3:end]
+                for vname in varnames
+                    left_bracket = findfirst(==('['), vname)
+                    if left_bracket === nothing
+                        push!(vars, (type, vname))
+                    else
+                        push!(vars, (
+                            type * vname[left_bracket:end],
+                            vname[1:left_bracket-1]
+                        ))
+                    end
+                end
+            end
+        end
+    end
+    return vars
+end
+
 """
     generate_dir(generator, silent=false)
 
