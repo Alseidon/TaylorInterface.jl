@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.2"
+julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "5f069936c00f406e58d3f7b257101a5467dafa57"
+project_hash = "3a57875d49559e9ffebc1fd0388794394f8b705f"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -16,3 +16,9 @@ version = "1.11.0"
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
+
+[[deps.TaylorInterface]]
+deps = ["Libdl", "Random"]
+path = "."
+uuid = "628e9319-2ed5-413a-8fcb-ba6034deb837"
+version = "1.0.1"
