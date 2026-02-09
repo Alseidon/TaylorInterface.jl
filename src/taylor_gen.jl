@@ -400,3 +400,25 @@ function clear_dir(gen::TaylorGenerator)
     run(`rm -rf $(get_taylor_dir(gen))`)
     return
 end
+
+function set_extern_var(handler::TaylorHandler, var_name, new_value)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("set_" * var_name))
+    ccall(
+        sym, Cvoid, (Cdouble,),
+        new_value
+    )
+end
+
+function set_extern_arr(handler::TaylorHandler, arr_name, arr_pos, new_value)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(lib, Symbol("set_" * arr_name))
+    ccall(
+        sym, Cvoid, (Cdouble, Cint),
+        new_value, arr_pos
+    )
+end
