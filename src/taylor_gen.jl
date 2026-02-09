@@ -171,21 +171,22 @@ end
 
 function get_extern_var_code(var_type, var_name)
     c_code = """
-    void set_$var_name($var_type new_value) {
-        $var_name = new_value;
-    }
+    void set_$var_name($var_type new_value) { $var_name = new_value; }
     """
-    h_code = "$var_type $var_name;\n"
+    h_code = """$var_type $var_name;
+    void set_$var_name($var_type new_value);
+    """
     return c_code, h_code
 end
 
 function get_extern_arr_code(var_type, var_name, var_size)
     c_code = """
-    void set_$var_name($var_type new_value, int i) {
-        $var_name[i] = new_value;
-    }
+    void set_$var_name($var_type new_value, int i) { $var_name[i] = new_value; }
     """
-    h_code = "$var_type[$var_size] $var_name;\n"
+    h_code = """
+    $var_type $var_name[$var_size];
+    void set_$var_name($var_type new_value, int i);
+    """
     return c_code, h_code
 end
 
@@ -197,7 +198,7 @@ function get_external_code(external_vars)
             external_vars
         );
         init=("", "")
-    )
+    ) .* '\n'
 end
 
 """
@@ -274,7 +275,7 @@ function generate_dir(gen::TaylorGenerator, silent=false)
                 write(hwrap, """
                 #ifndef WRAPPER_$(name)_H
                 #define WRAPPER_$(name)_H
-        
+
                 #include "taylor-$(name).h"\n
                 """)
                 write(hwrap, read(joinpath(get_dir_src(), pre_wrapper_h), String))
