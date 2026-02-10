@@ -1,4 +1,4 @@
-extern MY_FLOAT k;
+extern MY_FLOAT k[2];
 
-diff(x, t) = k*y;
-diff(y, t) = -k*x;
+diff(x, t) = k[0]*y;
+diff(y, t) = -k[1]*x;

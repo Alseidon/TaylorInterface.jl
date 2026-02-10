@@ -36,24 +36,25 @@ end
     TaylorInterface.clear_dir(gen)
 end
 
-# @testset "Integration test -- extern" begin
+@testset "Integration test -- extern" begin
     gen = TaylorGenerator("sincos_extern", "sincos_extern.eqs", ".")
     generate_dir(gen, true)
     han = get_handler(gen, true)
     
     x = [1., 0.]
-    df = zeros(4)
-    k = 2.
-    set_extern_var(han, "k", k)
-
+    k = [1., 2.]
+    set_extern_arr(han, "k", k)
+    get_extern_arr(han, "k", length(k))
+    flow(han, x, 1.)
+    get_extern_arr(han, "k", length(k))
     
     ts = LinRange(0., 2π, 101)
-    ys = map(t->flow!(han, x, t, df), ts)
+    ys = map(t->flow(han, x, t), ts)
     y1 = map(i->i[1], ys)
     y2 = map(i->i[2], ys)
     
-    @test y1 ≈ cos.(k * ts)
-    @test y2 ≈ -sin.(k * ts)
+    @test y1 ≈  sqrt(k[1]) .* cos.(sqrt(k[1]*k[2]) * ts)
+    @test y2 ≈ -sqrt(k[2]) .*sin.(sqrt(k[1]*k[2]) * ts)
     close_lib(han)
     TaylorInterface.clear_dir(gen)
-# end
+end

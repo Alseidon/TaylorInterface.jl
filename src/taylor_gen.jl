@@ -172,9 +172,11 @@ end
 function get_extern_var_code(var_type, var_name)
     c_code = """
     void set_$var_name($var_type new_value) { $var_name = new_value; }
+    $var_type get_$var_name() { return $var_name; }
     """
     h_code = """$var_type $var_name;
     void set_$var_name($var_type new_value);
+    $var_type get_$var_name();
     """
     return c_code, h_code
 end
@@ -182,10 +184,12 @@ end
 function get_extern_arr_code(var_type, var_name, var_size)
     c_code = """
     void set_$var_name($var_type new_value, int i) { $var_name[i] = new_value; }
+    $var_type get_$var_name(int i) { return $var_name[i]; }
     """
     h_code = """
     $var_type $var_name[$var_size];
     void set_$var_name($var_type new_value, int i);
+    $var_type get_$var_name(int i);
     """
     return c_code, h_code
 end
@@ -230,19 +234,20 @@ function generate_dir(gen::TaylorGenerator, silent=false)
         CFLAGS=-O2 -fPIC -Wno-unused-result
         CFLAGSSO=-shared
         LFLAGS=-lm
+        LDFLAGS=
         TAYLOR=taylor"""
         makefile_text = """
         $(prefix)
         all: lib.so
         
         lib.so: src/wrapper-$(name).o src/taylor-$(name).o
-        \t\$(CC) \$(CFLAGS) \$(CFLAGSSO) src/wrapper-$(name).o src/taylor-$(name).o -o lib.so \$(LFLAGS)
+        \t\$(CC) \$(CFLAGS) \$(CFLAGSSO) src/wrapper-$(name).o src/taylor-$(name).o -o lib.so \$(LFLAGS) \$(LDFLAGS)
 
         src/wrapper-$(name).o: src/wrapper-$(name).c src/wrapper-$(name).h src/taylor-$(name).c src/taylor-$(name).h
         \t\$(CC) \$(CFLAGS) -c src/wrapper-$(name).c -o src/wrapper-$(name).o
 
         src/taylor-$(name).o: src/taylor-$(name).c src/taylor-$(name).h
-        \t\$(CC) \$(CFLAGS) -c src/taylor-$(name).c -o src/taylor-$(name).o \$(LFLAGS)
+        \t\$(CC) \$(CFLAGS) -c src/taylor-$(name).c -o src/taylor-$(name).o \$(LFLAGS) \$(LDFLAGS)
 
         src/taylor-$(name).c: $(true_eqs_filename)
         \t\$(TAYLOR) -name auto -headername taylor-$(name).h -o src/taylor-$(name).c -jet -step $(jet_flag) -jet_helper $(true_eqs_filename)
@@ -251,7 +256,7 @@ function generate_dir(gen::TaylorGenerator, silent=false)
         \t\$(TAYLOR) -name auto -o src/taylor-$(name).h $(jet_flag) -header $(true_eqs_filename)
 
         clean:
-        \trm lib.so src/taylor-* src/*.o
+        \trm --force lib.so src/taylor-* src/*.o
         """
 
         open("Makefile", "w") do makefile
@@ -428,10 +433,34 @@ function set_extern_arr(handler::TaylorHandler, arr_name, new_arr)
         error("Handler isn't open")
     end
     sym = Libdl.dlsym(handler.lib, Symbol("set_" * arr_name))
-    for i in eachindex(new_arr)
+    for i in 1:length(new_arr)
         ccall(
             sym, Cvoid, (Cdouble, Cint),
-            new_arr[i], i
+            new_arr[i], i-1
         )
     end
+end
+
+function get_extern_var(handler::TaylorHandler, arr_name)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("get_" * arr_name))
+    return ccall(sym, Cdouble, ())
+end
+
+function get_extern_arr_i(handler::TaylorHandler, arr_name, arr_pos)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("get_" * arr_name))
+    return ccall(sym, Cdouble, (Cint,), arr_pos)
+end
+
+function get_extern_arr(handler::TaylorHandler, arr_name, arr_length)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("get_" * arr_name))
+    return map(i->ccall(sym, Cdouble, (Cint,), i), 0:(arr_length-1))
 end

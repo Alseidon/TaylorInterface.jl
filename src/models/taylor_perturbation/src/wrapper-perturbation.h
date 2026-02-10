@@ -7,12 +7,16 @@
 
 MY_FLOAT e1;
 void set_e1(MY_FLOAT new_value);
+MY_FLOAT get_e1();
 MY_FLOAT e2;
 void set_e2(MY_FLOAT new_value);
+MY_FLOAT get_e2();
 MY_FLOAT coef[10];
 void set_coef(MY_FLOAT new_value, int i);
+MY_FLOAT get_coef(int i);
 MY_FLOAT freq[10];
 void set_freq(MY_FLOAT new_value, int i);
+MY_FLOAT get_freq(int i);
 
 int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *__unused);
 

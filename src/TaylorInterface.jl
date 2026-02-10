@@ -11,6 +11,7 @@ export open_lib, close_lib
 export is_open, check_open
 export flow, flow!
 export set_extern_var, set_extern_arr_i, set_extern_arr
+export get_extern_var, get_extern_arr_i, get_extern_arr
 
 function __regenerate_model_dirs(check=true)
     eqfiles = readdir(joinpath(get_models_dir(), "eqs"), join=true)
