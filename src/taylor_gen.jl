@@ -13,7 +13,7 @@ required by taylor.
     parent_path::String = "."
 end
 
-TaylorGenerator(eqs_filename::String) = TaylorGenerator(eqs_filename)
+TaylorGenerator(eqs_filename::String) = TaylorGenerator(; eqs_filename)
 
 """
     TaylorHandler(path)

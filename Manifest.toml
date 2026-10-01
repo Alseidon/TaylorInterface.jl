@@ -1,7 +1,7 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.4"
-manifest_format = "2.0"
+julia_version = "1.13.1"
+manifest_format = "2.1"
 project_hash = "3a57875d49559e9ffebc1fd0388794394f8b705f"
 
 [[deps.Libdl]]
@@ -15,7 +15,7 @@ version = "1.11.0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
-version = "0.7.0"
+version = "1.0.0"
 
 [[deps.TaylorInterface]]
 deps = ["Libdl", "Random"]
