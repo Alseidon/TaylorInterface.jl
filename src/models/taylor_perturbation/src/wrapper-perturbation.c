@@ -1,3 +1,17 @@
+#include "wrapper-perturbation.h"
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
+void set_e1(MY_FLOAT new_value) { e1 = new_value; }
+MY_FLOAT get_e1() { return e1; }
+void set_e2(MY_FLOAT new_value) { e2 = new_value; }
+MY_FLOAT get_e2() { return e2; }
+void set_coef(MY_FLOAT new_value, int i) { coef[i] = new_value; }
+MY_FLOAT get_coef(int i) { return coef[i]; }
+void set_freq(MY_FLOAT new_value, int i) { freq[i] = new_value; }
+MY_FLOAT get_freq(int i) { return freq[i]; }
+
 int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *__unused)
 {
   double t,tf;

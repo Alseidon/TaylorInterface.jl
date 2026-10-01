@@ -139,6 +139,71 @@ function get_wrappers(gen::TaylorGenerator)
     end
 end
 
+get_pre_wrappers(gen::TaylorGenerator) = "original_wrappers/pre_wrapper.c", "original_wrappers/pre_wrapper.h"
+
+
+is_sep(c) = isspace(c) || c == ',' ||  c == ';'
+
+function get_external_variables(gen::TaylorGenerator)
+    vars = Tuple{String, String, Int64}[]
+    open(gen.eqs_filename, "r") do file
+        for line in eachline(file)
+            if length(line) > 6 && view(line, 1:6) == "extern"
+                type = split(line, ' '; limit=3, keepempty=false)[2]
+                varnames = split(line, is_sep; keepempty=false)[3:end]
+                for vname in varnames
+                    left_bracket = findfirst(==('['), vname)
+                    if left_bracket === nothing
+                        push!(vars, (type, vname, -1))
+                    else
+                        push!(vars, (
+                            type,
+                            vname[1:left_bracket-1],
+                            parse(Int64, vname[left_bracket+1:end-1])
+                        ))
+                    end
+                end
+            end
+        end
+    end
+    return vars
+end
+
+function get_extern_var_code(var_type, var_name)
+    c_code = """
+    void set_$var_name($var_type new_value) { $var_name = new_value; }
+    $var_type get_$var_name() { return $var_name; }
+    """
+    h_code = """$var_type $var_name;
+    void set_$var_name($var_type new_value);
+    $var_type get_$var_name();
+    """
+    return c_code, h_code
+end
+
+function get_extern_arr_code(var_type, var_name, var_size)
+    c_code = """
+    void set_$var_name($var_type new_value, int i) { $var_name[i] = new_value; }
+    $var_type get_$var_name(int i) { return $var_name[i]; }
+    """
+    h_code = """
+    $var_type $var_name[$var_size];
+    void set_$var_name($var_type new_value, int i);
+    $var_type get_$var_name(int i);
+    """
+    return c_code, h_code
+end
+
+function get_external_code(external_vars)
+    return isempty(external_vars) ? ("", "") : reduce(
+        (a, b)->(a[1]*b[1], a[2]*b[2]),
+        map(
+            tup->(tup[3] == -1 ? get_extern_var_code(tup[1], tup[2]) : get_extern_arr_code(tup[1], tup[2], tup[3])),
+            external_vars
+        );
+    ) .* '\n'
+end
+
 """
     generate_dir(generator, silent=false)
 
@@ -150,6 +215,8 @@ function generate_dir(gen::TaylorGenerator, silent=false)
     curr_dir = pwd()
     jet_flag = get_jet_flag(gen)
     wrapper_c, wrapper_h = get_wrappers(gen)
+    pre_wrapper_c, pre_wrapper_h = get_pre_wrappers(gen)
+    extern_vars_c, extern_vars_h = get_external_variables(gen) |> get_external_code
     if isdir(dir)
         @warn "$(dir) already exists. Cleaning..."
         clear_dir(gen)
@@ -167,19 +234,20 @@ function generate_dir(gen::TaylorGenerator, silent=false)
         CFLAGS=-O2 -fPIC -Wno-unused-result
         CFLAGSSO=-shared
         LFLAGS=-lm
+        LDFLAGS=
         TAYLOR=taylor"""
         makefile_text = """
         $(prefix)
         all: lib.so
         
         lib.so: src/wrapper-$(name).o src/taylor-$(name).o
-        \t\$(CC) \$(CFLAGS) \$(CFLAGSSO) src/wrapper-$(name).o src/taylor-$(name).o -o lib.so \$(LFLAGS)
+        \t\$(CC) \$(CFLAGS) \$(CFLAGSSO) src/wrapper-$(name).o src/taylor-$(name).o -o lib.so \$(LFLAGS) \$(LDFLAGS)
 
         src/wrapper-$(name).o: src/wrapper-$(name).c src/wrapper-$(name).h src/taylor-$(name).c src/taylor-$(name).h
         \t\$(CC) \$(CFLAGS) -c src/wrapper-$(name).c -o src/wrapper-$(name).o
 
         src/taylor-$(name).o: src/taylor-$(name).c src/taylor-$(name).h
-        \t\$(CC) \$(CFLAGS) -c src/taylor-$(name).c -o src/taylor-$(name).o \$(LFLAGS)
+        \t\$(CC) \$(CFLAGS) -c src/taylor-$(name).c -o src/taylor-$(name).o \$(LFLAGS) \$(LDFLAGS)
 
         src/taylor-$(name).c: $(true_eqs_filename)
         \t\$(TAYLOR) -name auto -headername taylor-$(name).h -o src/taylor-$(name).c -jet -step $(jet_flag) -jet_helper $(true_eqs_filename)
@@ -188,7 +256,7 @@ function generate_dir(gen::TaylorGenerator, silent=false)
         \t\$(TAYLOR) -name auto -o src/taylor-$(name).h $(jet_flag) -header $(true_eqs_filename)
 
         clean:
-        \trm lib.so src/taylor-* src/*.o
+        \trm --force lib.so src/taylor-* src/*.o
         """
 
         open("Makefile", "w") do makefile
@@ -200,6 +268,8 @@ function generate_dir(gen::TaylorGenerator, silent=false)
             cwraptext = read(cwrap, String)
             open("src/wrapper-$(name).c", "w") do cwrap
                 write(cwrap, "#include \"wrapper-$(name).h\"\n")
+                write(cwrap, read(joinpath(get_dir_src(), pre_wrapper_c), String))
+                write(cwrap, extern_vars_c)
                 write(cwrap, cwraptext)
             end
         end
@@ -209,9 +279,11 @@ function generate_dir(gen::TaylorGenerator, silent=false)
                 write(hwrap, """
                 #ifndef WRAPPER_$(name)_H
                 #define WRAPPER_$(name)_H
-        
+
                 #include "taylor-$(name).h"\n
                 """)
+                write(hwrap, read(joinpath(get_dir_src(), pre_wrapper_h), String))
+                write(hwrap, extern_vars_h)
                 write(hwrap, hwraptext)
             end    
         end
@@ -332,4 +404,63 @@ Delete the directory referred by the generator.
 function clear_dir(gen::TaylorGenerator)
     run(`rm -rf $(get_taylor_dir(gen))`)
     return
+end
+
+function set_extern_var(handler::TaylorHandler, var_name, new_value)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("set_" * var_name))
+    ccall(
+        sym, Cvoid, (Cdouble,),
+        new_value
+    )
+end
+
+function set_extern_arr_i(handler::TaylorHandler, arr_name, arr_pos, new_value)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("set_" * arr_name))
+    ccall(
+        sym, Cvoid, (Cdouble, Cint),
+        new_value, arr_pos
+    )
+end
+
+function set_extern_arr(handler::TaylorHandler, arr_name, new_arr)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("set_" * arr_name))
+    for i in 1:length(new_arr)
+        ccall(
+            sym, Cvoid, (Cdouble, Cint),
+            new_arr[i], i-1
+        )
+    end
+end
+
+function get_extern_var(handler::TaylorHandler, arr_name)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("get_" * arr_name))
+    return ccall(sym, Cdouble, ())
+end
+
+function get_extern_arr_i(handler::TaylorHandler, arr_name, arr_pos)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("get_" * arr_name))
+    return ccall(sym, Cdouble, (Cint,), arr_pos)
+end
+
+function get_extern_arr(handler::TaylorHandler, arr_name, arr_length)
+    if !is_open(handler)
+        error("Handler isn't open")
+    end
+    sym = Libdl.dlsym(handler.lib, Symbol("get_" * arr_name))
+    return map(i->ccall(sym, Cdouble, (Cint,), i), 0:(arr_length-1))
 end

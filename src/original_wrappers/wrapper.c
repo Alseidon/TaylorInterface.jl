@@ -1,7 +1,3 @@
-#ifndef M_PI
-    #define M_PI 3.14159265358979323846
-#endif
-
 int flow(double endtime, MY_FLOAT *x, MY_FLOAT *y, MY_FLOAT *df)
 {
   static MY_JET xjet[_NUMBER_OF_STATE_VARS_];
